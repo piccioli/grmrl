@@ -15,7 +15,9 @@ class ExportController extends Controller
     {
         $activityId = $request->integer('activity_id') ?: null;
 
-        return Excel::download(new RegistrationsExport($activityId), 'iscrizioni.xlsx');
+        $filename = 'iscrizioni-' . now()->format('Y-m-d') . '.xlsx';
+
+        return Excel::download(new RegistrationsExport($activityId), $filename);
     }
 
     public function print(Request $request)
