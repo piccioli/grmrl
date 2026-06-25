@@ -153,11 +153,24 @@ class RegistrationController extends Controller
 
         Mail::to($registration->email)->send(new RegistrationConfirmation($registration));
 
-        return redirect()->route('registrations.confirm')->with('email', $registration->email);
+        return redirect()->route('registrations.confirm')
+            ->with('email', $registration->email)
+            ->with('registration_id', $registration->id);
     }
 
     public function confirm(): View
     {
-        return view('registration.confirm');
+        $registration = null;
+
+        if ($id = session('registration_id')) {
+            $registration = Registration::with([
+                'activity',
+                'minors',
+                'minors.caiSection',
+                'caiSection',
+            ])->find($id);
+        }
+
+        return view('registration.confirm', compact('registration'));
     }
 }
