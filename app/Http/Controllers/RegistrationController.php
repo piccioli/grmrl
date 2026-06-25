@@ -54,7 +54,7 @@ class RegistrationController extends Controller
         $request->validate([
             'first_name'                    => ['required', 'string', 'max:255'],
             'last_name'                     => ['required', 'string', 'max:255'],
-            'email'                         => ['required', 'email', 'max:255'],
+            'email'                         => ['required', 'email', 'max:255', 'unique:registrations,email'],
             'phone'                         => ['required', 'string', 'max:50'],
             'birth_date'                    => ['required', 'date'],
             'is_cai_member'                 => ['nullable', 'boolean'],
@@ -83,6 +83,7 @@ class RegistrationController extends Controller
             'last_name.required'                     => 'Il cognome è obbligatorio.',
             'email.required'                         => "L'indirizzo email è obbligatorio.",
             'email.email'                            => "L'indirizzo email non è valido.",
+            'email.unique'                           => "Questo indirizzo email è già stato utilizzato per un'iscrizione. Ogni partecipante deve usare un'email univoca.",
             'phone.required'                         => 'Il numero di telefono è obbligatorio.',
             'birth_date.required'                    => 'La data di nascita è obbligatoria.',
             'birth_date.date'                        => 'La data di nascita non è valida.',
