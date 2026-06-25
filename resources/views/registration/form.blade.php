@@ -235,7 +235,7 @@
         }"
         class="mt-6 space-y-4"
     >
-        <div class="bg-white rounded-xl shadow-sm p-6">
+        <div class="bg-white rounded-xl shadow-sm p-6 @error('minors') border border-red-400 bg-red-50 @enderror">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-semibold text-gray-800">Minori accompagnati</h3>
                 <button
@@ -250,6 +250,10 @@
                     Aggiungi minore
                 </button>
             </div>
+
+            @error('minors')
+                <p class="text-red-600 text-sm font-medium mb-3">È obbligatorio aggiungere almeno un minore.</p>
+            @enderror
 
             <p x-show="minors.length === 0" class="text-sm text-gray-500 italic">Nessun minore aggiunto. Massimo 3 minori.</p>
 
