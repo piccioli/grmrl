@@ -1,3 +1,19 @@
+## 2026-06-25 - US-022
+- Created `database/seeders/FakeRegistrationsSeeder.php`
+- Picks random activity with `Activity::inRandomOrder()->first()`; guards with error message if no activities exist
+- Loop `while ($activity->availableSpots() > 0)`: creates Registration + 1 Minor per iteration (2 spots per registration)
+- With max_capacity=50, creates exactly 25 registrations (25 adults + 25 minors = 50 spots)
+- Fake data: `fake()->firstName/lastName/safeEmail`, is_cai_member=true, cai_section_id from `CaiSection::inRandomOrder()->value('id')`, fiscal_code=`strtoupper(Str::random(16))`, all consents=true
+- Minor: firstName/lastName random, birth_date ~10 years ago, no CAI section/fiscal_code
+- NOT added to DatabaseSeeder (standalone only)
+- Verified: seeder runs cleanly, outputs "Created 25 fake registrations for X. isFull: true"
+- All 5 tests pass
+- **Learnings for future iterations:**
+  - `Activity::inRandomOrder()->first()` — works in MySQL; for testing in SQLite use `Activity::all()->random()`
+  - `$activity->availableSpots()` re-queries DB each call — correct for loop termination but O(n²) reads; acceptable for a dev-only seeder with ≤50 iterations
+  - `CaiSection::inRandomOrder()->value('id')` is a cheap way to get a single random FK value without loading the full model
+---
+
 ## 2026-06-25 - US-021
 - Created `app/Filament/Resources/ActivityResource.php` with List and Edit pages only (no Create/Delete)
 - Table columns: name (searchable/sortable), meeting_place, meeting_time, max_capacity, available_spots (getStateUsing → availableSpots()), is_active (IconColumn boolean)
