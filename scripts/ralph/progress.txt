@@ -10,6 +10,16 @@
 Started: 25 Giu 2026
 ---
 
+## 2026-06-25 - US-029
+- `showForm()` ora cerca il nome della sezione CAI tramite `CaiSection::find(old('cai_section_id'))` e lo passa alla view come `$preloadedSectionName`
+- Nel blade, `sectionQuery` viene inizializzato con `@json($preloadedSectionName)` invece di `old('_section_name', '')` (che non era mai in POST)
+- Files changed: `app/Http/Controllers/RegistrationController.php`, `resources/views/registration/form.blade.php`
+- **Learnings for future iterations:**
+  - `old('_section_name')` non funzionava perché `_section_name` non è mai nel body della POST — i dati Alpine non vengono automaticamente sottomessi come hidden inputs
+  - Usare `@json($var)` invece di `'{{ $var }}'` nelle stringhe JS del x-data per gestire apostrofi e caratteri speciali
+  - Il redirect back con withInput() fa rieseguire showForm() con i vecchi valori disponibili tramite old()
+---
+
 ## 2026-06-25 - US-032
 - Aggiunta regola `unique:registrations,email` alla validazione del campo email in `RegistrationController::store()`
 - Aggiunto messaggio d'errore in italiano: "Questo indirizzo email è già stato utilizzato per un'iscrizione. Ogni partecipante deve usare un'email univoca."
