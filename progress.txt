@@ -1,3 +1,16 @@
+## 2026-06-25 - US-034
+- Installed `barryvdh/laravel-dompdf` v3.1.2 via `docker-compose exec app composer require barryvdh/laravel-dompdf`
+- Updated `app/Http/Controllers/Admin/ExportController.php`: imported `Barryvdh\DomPDF\Facade\Pdf`, added `activity` to eager loading, set `$generatedAt = now()->format('d/m/Y')`, returns `Pdf::loadView('admin.print', ...)->download('iscrizioni-YYYY-MM-DD.pdf')`
+- Rewrote `resources/views/admin/print.blade.php` as PDF-only view: uses `DejaVu Sans` (dompdf-safe font), inline CSS only, header 'Iscrizioni – Giornata Regionale della Montagna' + generation date, table with columns Nome, Cognome, Email, Telefono, Attività, Socio CAI (Sì/No), Sezione, Minori
+- Route was already defined in `routes/web.php` from a previous iteration
+- All 5 tests pass
+- **Learnings for future iterations:**
+  - Use `DejaVu Sans` as the font family in dompdf views — it's the default embedded font and handles UTF-8 characters (Italian accents); `Arial` alone may not render correctly
+  - `Pdf::loadView('view.name', $data)->download('filename.pdf')` is the dompdf facade pattern — no need to call `->setPaper()` for basic A4 output
+  - The print blade view needs to be purely HTML/CSS — no Alpine.js, no Tailwind, no external assets; dompdf renders HTML to PDF without a browser engine
+  - Pass `$generatedAt` as a pre-formatted string from the controller rather than calling `now()` in the blade template
+---
+
 ## 2026-06-25 - US-033
 - Route GET /admin/registrations/export already existed from previous iteration (US-015)
 - `app/Exports/RegistrationsExport.php` already implements FromQuery + WithHeadings + WithMapping with all required columns
