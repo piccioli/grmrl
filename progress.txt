@@ -1,0 +1,24 @@
+## Codebase Patterns
+- Use `docker-compose exec app <command>` to run artisan/composer commands inside the container
+- Filament requires `ext-intl` — add `libicu-dev` + `docker-php-ext-configure intl` + `docker-php-ext-install intl` to Dockerfile
+- Filament 3.3 requires `symfony/console ^6|^7` but Laravel 13 locks it to v8. Install with `composer require filament/filament:'^3.3' --with-all-dependencies` to allow the downgrade to v7.4
+- The User model must implement `Filament\Models\Contracts\FilamentUser` and define `canAccessPanel(Panel $panel): bool`
+- `php artisan filament:install --panels` emits a harmless `xdg-open: not found` error in Docker (no browser) — installation succeeds anyway
+- `/admin` returns 302 (redirect to login); follow with `-L` to get the 200 from the login page
+
+---
+
+## 2026-06-25 - US-002
+- Installed Filament 3.3.54 via `composer require filament/filament:'^3.3' --with-all-dependencies`
+- Added `libicu-dev` and `ext-intl` to Dockerfile; rebuilt app container
+- Ran `php artisan filament:install --panels` — created `app/Providers/Filament/AdminPanelProvider.php` and published CSS/JS assets
+- Updated `app/Models/User.php` to implement `FilamentUser` interface with `canAccessPanel` returning true
+- Updated `bootstrap/providers.php` (auto-registered by Filament)
+- Rewrote `.env.example` with all required vars: DB (MySQL), MAIL (MailPit), FILAMENT_ADMIN_EMAIL/PASSWORD, GRMRL_PHONE/EMAIL/SUPPORT_HOURS
+- Rewrote `README.md` with setup instructions: cp .env.example .env, docker-compose up -d, composer install, key:generate, migrate --seed
+- Verified: `curl -L http://localhost/admin` → HTTP 200; all 2 tests pass
+- **Learnings for future iterations:**
+  - Filament 3.3 + Laravel 13 requires --with-all-dependencies due to symfony/console version conflict
+  - Dockerfile needs ext-intl for Filament (add libicu-dev to apt-get and configure/install intl)
+  - Always rebuild the Docker container after Dockerfile changes before installing PHP extensions
+---

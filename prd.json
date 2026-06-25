@@ -34,8 +34,8 @@
         "Typecheck passes"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Filament 3.3.54 installato con --with-all-dependencies (downgrade symfony/console da v8 a v7.4 per compatibilità). Aggiunta estensione intl al Dockerfile. User model implementa FilamentUser. /admin/login risponde 200."
     },
     {
       "id": "US-003",
