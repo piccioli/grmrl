@@ -80,3 +80,16 @@ Started: Gio 25 Giu 2026 17:02:25 CEST
   - Access `$mailable->registration->email` after deletion works because the PHP object is still in memory with all eager-loaded relations
   - Use `Mail::to($email)->send($mailable)` for synchronous (no-queue) sending; Mailpit captures it locally at localhost:8025
 ---
+
+## 2026-06-25 - US-043
+- Implemented: go-live script for first production deploy, .env.production.example, and production.compose.yml
+- Files changed:
+  - `scripts/deploy/golive.sh` (new — SSH-based deploy script with configurable variables at top)
+  - `.env.production.example` (new — all keys from .env.example with production-appropriate placeholders)
+  - `production.compose.yml` (new — no mailpit, no dev bind-mounts, APP_ENV=production, uses env_file .env)
+- **Learnings for future iterations:**
+  - production.compose.yml mounts no code volumes (app image baked at build time via `COPY . .` in Dockerfile)
+  - `docker compose exec -T` is needed in SSH/non-TTY context (no terminal allocated)
+  - golive.sh uses `set -euo pipefail` and prints descriptive step headers; stops on any failure
+  - .env.production.example uses `${DB_PASSWORD}` in production.compose.yml so healthcheck and mysql env share the same value from .env
+---
