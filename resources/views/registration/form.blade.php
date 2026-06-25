@@ -255,6 +255,19 @@
                 <p class="text-red-600 text-sm font-medium mb-3">È obbligatorio aggiungere almeno un minore.</p>
             @enderror
 
+            @php
+                $minorFieldErrors = collect($errors->toArray())->filter(fn($v, $k) => preg_match('/^minors\.\d+\./', $k));
+            @endphp
+            @if($minorFieldErrors->isNotEmpty())
+                <div class="mb-3 space-y-1">
+                    @foreach($minorFieldErrors as $msgs)
+                        @foreach($msgs as $msg)
+                            <p class="text-red-600 text-sm">{{ $msg }}</p>
+                        @endforeach
+                    @endforeach
+                </div>
+            @endif
+
             <p x-show="minors.length === 0" class="text-sm text-gray-500 italic">Nessun minore aggiunto. Massimo 3 minori.</p>
 
             <template x-for="(minor, index) in minors" :key="index">
