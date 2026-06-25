@@ -3,6 +3,8 @@
 - Tests use `php artisan test` (no PHPStan, just Pint and Pest/PHPUnit)
 - Migrations use `2026_06_25_XXXXXX_` prefix; add columns with `->after()` for clean ordering
 - Use `Illuminate\Support\Facades\Http` for external HTTP calls (Laravel Http client is available); Pint enforces `concat_space` so use `' '` not `" "` for string concat
+- Always run `pint` (without `--test`) to auto-fix style before committing; there may be pre-existing issues in unrelated files that Pint will fix as part of the commit
+- RegistrationController maps Activity model fields to an array for the view; add new model fields there when they need to be accessible in Blade templates
 
 # Ralph Progress Log
 Started: Gio 25 Giu 2026 17:02:25 CEST
@@ -17,6 +19,18 @@ Started: Gio 25 Giu 2026 17:02:25 CEST
   - Docker containers are running; always use `docker compose exec app` for artisan/PHP commands
   - Migration ran cleanly; all 5 tests pass
   - latitude/longitude cast as 'float' in the model
+---
+
+## 2026-06-25 - US-039
+- Implemented: Meeting place in activity cards is now a clickable Google Maps link when latitude/longitude are non-null; falls back to plain text when coordinates are missing
+- Files changed:
+  - `app/Http/Controllers/RegistrationController.php` (added `latitude` and `longitude` to the activity array mapping)
+  - `resources/views/activities.blade.php` (conditional `<a>` tag for meeting place)
+  - Also applied Pint auto-fix to 11 pre-existing style issues across unrelated files
+- **Learnings for future iterations:**
+  - The implementation was already partially present in the working tree (uncommitted changes from a prior session)
+  - Pint may accumulate style issues across multiple files; always run `./vendor/bin/pint` (not `--test`) before committing to fix them all
+  - RegistrationController builds an array map of Activity fields for the view — any new model field needed in Blade must be explicitly added there
 ---
 
 ## 2026-06-25 - US-038
