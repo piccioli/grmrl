@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Activity;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Http;
 
 class ActivitySeeder extends Seeder
 {
@@ -47,8 +48,47 @@ class ActivitySeeder extends Seeder
             ],
         ];
 
-        foreach ($activities as $data) {
-            Activity::create($data);
+        foreach ($activities as $index => $data) {
+            if ($index > 0) {
+                sleep(1);
+            }
+
+            $coords = $this->geocode($data['meeting_place']);
+
+            Activity::create(array_merge($data, $coords));
+        }
+    }
+
+    private function geocode(string $place): array
+    {
+        $query = $place.' Italia';
+
+        try {
+            $response = Http::withHeaders(['User-Agent' => 'GRMRL/1.0'])
+                ->get('https://nominatim.openstreetmap.org/search', [
+                    'q' => $query,
+                    'format' => 'json',
+                    'limit' => 1,
+                ]);
+
+            $results = $response->json();
+
+            if (empty($results)) {
+                $this->command->warn("Nominatim: nessun risultato per \"{$place}\"");
+
+                return ['latitude' => null, 'longitude' => null];
+            }
+
+            $lat = (float) $results[0]['lat'];
+            $lng = (float) $results[0]['lon'];
+
+            $this->command->info("{$place} → {$lat}, {$lng}");
+
+            return ['latitude' => $lat, 'longitude' => $lng];
+        } catch (\Exception $e) {
+            $this->command->warn("Nominatim: errore per \"{$place}\": {$e->getMessage()}");
+
+            return ['latitude' => null, 'longitude' => null];
         }
     }
 }
