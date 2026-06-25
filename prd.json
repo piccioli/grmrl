@@ -153,8 +153,8 @@
         "Typecheck passes"
       ],
       "priority": 9,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Alpine.js 3.15 installed via npm; initialized in resources/js/app.js. Form section added to registration/form.blade.php with x-data for isCaiMember toggle. All fields present with correct names: first_name, last_name, email, phone, birth_date, is_cai_member, cai_section_id (hidden), fiscal_code. CAI section autocomplete: fetches /api/sections?q= on keyup (min 2 chars), shows dropdown with name+province, saves id in hidden input. Non-socio shows fiscal_code field + insurance info message. Stub routes added: POST / (registrations.store), GET /conferma (registrations.confirm). All 5 tests pass."
     },
     {
       "id": "US-010",
