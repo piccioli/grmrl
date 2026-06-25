@@ -1,3 +1,15 @@
+## 2026-06-25 - US-027
+- Added `Rule::forEach()` validation rule for `minors.*.cai_section_id` in `RegistrationController::store()`: required when the sibling `is_cai_member` field is truthy, plus `exists:cai_sections,id`
+- Used `explode('.', $attribute)[1]` inside the forEach closure to extract the array index and look up `$data['minors'][$index]['is_cai_member']`
+- Added Italian messages: 'La sezione CAI del minore è obbligatoria per i soci.' and 'La sezione CAI del minore selezionata non è valida.'
+- Added a PHP block in `registration/form.blade.php` that collects and displays any `minors.\d+.*` errors as a summary list inside the minors card (since individual fields are Alpine-rendered and can't use @error inline)
+- All 5 tests pass
+- **Learnings for future iterations:**
+  - `Rule::forEach(fn($value, $attribute, $data) => [...])` is the right approach for conditional rules on wildcard array fields — `required_if:minors.*.field,val` does NOT work across same-level wildcards
+  - Extract the array index from the attribute path with `explode('.', $attribute)[1]` to cross-reference sibling fields
+  - For Alpine.js-rendered form fields, server errors can't be shown inline via @error; use a summary block that scans `$errors->toArray()` for keys matching a regex pattern
+---
+
 ## 2026-06-25 - US-026
 - Added `@error('minors') ... @enderror` block inside the "Minori accompagnati" card in `resources/views/registration/form.blade.php`
 - Message text: 'È obbligatorio aggiungere almeno un minore.' displayed as red text
