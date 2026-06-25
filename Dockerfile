@@ -5,12 +5,16 @@ RUN apt-get update && apt-get install -y \
     libjpeg-dev \
     libwebp-dev \
     libzip-dev \
+    libicu-dev \
     unzip \
     curl \
+    && docker-php-ext-configure intl \
     && docker-php-ext-install \
     pdo_mysql \
     zip \
     gd \
+    intl \
+    opcache \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
