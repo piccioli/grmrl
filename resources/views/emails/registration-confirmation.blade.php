@@ -31,11 +31,11 @@
     <div class="header">
         <div class="logos">
             <span style="display:inline-flex;flex-direction:column;align-items:center;gap:4px;">
-                <img src="data:image/png;base64,{{ $caiLogoBase64 }}" alt="Logo CAI">
+                <img src="{{ asset('images/cai-logo.png') }}" alt="Logo CAI">
                 <span style="color:#ffffff;font-size:11px;font-weight:600;letter-spacing:0.3px;">Gruppo Regionale Lombardia</span>
             </span>
             <span style="display:inline-block;background:#ffffff;border-radius:8px;padding:6px 10px;">
-                <img src="data:image/png;base64,{{ $rlLogoBase64 }}" alt="Regione Lombardia – Il Consiglio" style="height:58px;display:block;">
+                <img src="{{ asset('images/rl-logo.png') }}" alt="Regione Lombardia – Il Consiglio" style="height:58px;display:block;">
             </span>
         </div>
         <h1>Giornata Regionale della Montagna – Regione Lombardia | GRMRL</h1>
@@ -108,7 +108,7 @@
 
     {{-- Footer --}}
     <div class="footer">
-        <div><img src="data:image/png;base64,{{ $msLogoBase64 }}" alt="Logo Montagna Servizi"></div>
+        <div><img src="{{ asset('images/ms-logo.png') }}" alt="Logo Montagna Servizi"></div>
         <div>Realizzato da Montagna Servizi SCPA</div>
         <div style="margin-top:6px;">Sede legale: Via Errico Petrella 19, 20124 Milano (MI) | P.IVA 11790660960 | SDI: M5UXCR1</div>
     </div>
