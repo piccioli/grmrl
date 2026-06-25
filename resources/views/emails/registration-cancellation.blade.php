@@ -8,6 +8,7 @@
         body { font-family: Arial, sans-serif; color: #333; margin: 0; padding: 0; background: #f5f5f5; }
         .wrapper { max-width: 600px; margin: 0 auto; background: #fff; }
         .header { background: #1a3a5c; padding: 24px 32px; text-align: center; }
+        .header .logos { display: inline-flex; align-items: center; gap: 24px; }
         .header img { height: 70px; display: inline-block; }
         .header h1 { color: #fff; font-size: 16px; margin: 12px 0 0; }
         .body { padding: 32px; }
@@ -26,7 +27,15 @@
 <div class="wrapper">
     {{-- Header --}}
     <div class="header">
-        <img src="data:image/png;base64,{{ $caiLogoBase64 }}" alt="Logo CAI">
+        <div class="logos">
+            <span style="display:inline-flex;flex-direction:column;align-items:center;gap:4px;">
+                <img src="data:image/png;base64,{{ $caiLogoBase64 }}" alt="Logo CAI">
+                <span style="color:#ffffff;font-size:11px;font-weight:600;letter-spacing:0.3px;">Gruppo Regionale Lombardia</span>
+            </span>
+            <span style="display:inline-block;background:#ffffff;border-radius:8px;padding:6px 10px;">
+                <img src="data:image/png;base64,{{ $rlLogoBase64 }}" alt="Regione Lombardia – Il Consiglio" style="height:58px;display:block;">
+            </span>
+        </div>
         <h1>Giornata Regionale della Montagna – Regione Lombardia | GRMRL</h1>
     </div>
 
