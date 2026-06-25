@@ -2,45 +2,40 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iscrizioni – {{ $activity?->name ?? 'Tutte le attività' }}</title>
+    <title>Iscrizioni – Giornata Regionale della Montagna</title>
     <style>
-        body { font-family: Arial, sans-serif; font-size: 13px; margin: 20px; }
-        h1 { font-size: 18px; margin-bottom: 4px; }
-        .subtitle { font-size: 14px; color: #555; margin-bottom: 16px; }
+        body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 11px; margin: 20px; color: #222; }
+        h1 { font-size: 15px; margin-bottom: 4px; }
+        .subtitle { font-size: 11px; color: #555; margin-bottom: 4px; }
+        .generated { font-size: 10px; color: #888; margin-bottom: 16px; }
         table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #ccc; padding: 6px 8px; text-align: left; }
-        th { background: #f0f0f0; font-weight: bold; }
-        tr:nth-child(even) td { background: #fafafa; }
-        .no-print { margin-bottom: 16px; }
-        @media print {
-            .no-print { display: none; }
-            nav, aside, header.fi-topbar, .fi-sidebar { display: none !important; }
-        }
+        th, td { border: 1px solid #ccc; padding: 4px 6px; text-align: left; vertical-align: top; }
+        th { background: #e8e8e8; font-weight: bold; }
+        tr:nth-child(even) td { background: #f7f7f7; }
+        .footer { margin-top: 12px; font-size: 10px; color: #888; }
     </style>
 </head>
 <body>
 
-<div class="no-print">
-    <button onclick="window.print()">Stampa</button>
-    <a href="{{ url()->previous() }}" style="margin-left:12px;">← Torna al pannello</a>
-</div>
-
-<h1>Iscrizioni – Respira la Montagna – 5 luglio 2026</h1>
+<h1>Iscrizioni – Giornata Regionale della Montagna</h1>
 @if($activity)
-    <div class="subtitle">Attività: {{ $activity->name }} | Ritrovo: {{ $activity->meeting_time }} – {{ $activity->meeting_place }}</div>
+    <div class="subtitle">Attività: {{ $activity->name }}</div>
 @else
     <div class="subtitle">Tutte le attività</div>
 @endif
+<div class="generated">Generato il {{ $generatedAt }}</div>
 
 <table>
     <thead>
         <tr>
             <th>#</th>
-            <th>Nome e Cognome</th>
+            <th>Nome</th>
+            <th>Cognome</th>
             <th>Email</th>
             <th>Telefono</th>
-            <th>Sezione CAI</th>
+            <th>Attività</th>
+            <th>Socio CAI</th>
+            <th>Sezione</th>
             <th>Minori</th>
         </tr>
     </thead>
@@ -48,21 +43,24 @@
         @forelse($registrations as $i => $reg)
             <tr>
                 <td>{{ $i + 1 }}</td>
-                <td>{{ $reg->first_name }} {{ $reg->last_name }}</td>
+                <td>{{ $reg->first_name }}</td>
+                <td>{{ $reg->last_name }}</td>
                 <td>{{ $reg->email }}</td>
                 <td>{{ $reg->phone }}</td>
-                <td>{{ $reg->caiSection?->name ?? 'Non socio' }}</td>
-                <td>{{ $reg->minors->map(fn ($m) => $m->first_name.' '.$m->last_name)->join(', ') ?: '—' }}</td>
+                <td>{{ $reg->activity?->name ?? '—' }}</td>
+                <td>{{ $reg->is_cai_member ? 'Sì' : 'No' }}</td>
+                <td>{{ $reg->caiSection?->name ?? '—' }}</td>
+                <td>{{ $reg->minors->map(fn ($m) => $m->first_name . ' ' . $m->last_name)->join(', ') ?: '—' }}</td>
             </tr>
         @empty
             <tr>
-                <td colspan="6" style="text-align:center;color:#888;">Nessuna iscrizione</td>
+                <td colspan="9" style="text-align:center;color:#888;">Nessuna iscrizione</td>
             </tr>
         @endforelse
     </tbody>
 </table>
 
-<p style="margin-top:12px;font-size:11px;color:#888;">Totale iscritti: {{ $registrations->count() }}</p>
+<p class="footer">Totale iscritti: {{ $registrations->count() }}</p>
 
 </body>
 </html>
