@@ -1,30 +1,20 @@
+## Codebase Patterns
+- Tests must run inside Docker: `docker compose exec app php artisan test` (DB is only available inside the container)
+- Config keys in `config/grmrl.php` map from `.env` vars; always add corresponding `.env.example` entries when adding new config keys
+- Layout at `resources/views/layouts/app.blade.php` uses `config('grmrl.*')` for dynamic values in header
+
 # Ralph Progress Log
-Started: Mar  2 Giu 2026 12:10:21 CEST
+Started: 25 Giu 2026
 ---
 
-## Codebase Patterns
-- Laravel 13 (laravel/framework v13.x) è installato — richiede PHP >= 8.4 via Symfony 8. Non usare php:8.3-fpm.
-- Il Dockerfile usa php:8.4-fpm; la dipendenza vendor va rigenerata dentro il container con `docker compose exec app composer install`
-- docker-compose.yml monta il codice in /var/www/html; nginx legge da /var/www/html/public
-- La config nginx è in docker/nginx.conf (montata come volume nel servizio nginx)
-- DB_HOST=db, DB_DATABASE=grmrl, DB_USERNAME=grmrl, DB_PASSWORD=secret in .env
-- Mailpit è raggiungibile su http://localhost:8025 (SMTP interno: mailpit:1025)
-- Per eseguire comandi artisan: `docker compose exec app php artisan ...`
-- SESSION_DRIVER=database, CACHE_STORE=database, QUEUE_CONNECTION=database (usano MySQL)
-
-## 2026-06-25 - US-001
-- Implementato setup Docker + Laravel
-- Creato `docker-compose.yml` con servizi: app (php:8.4-fpm), db (MySQL 8), mailpit, nginx
-- Creato `Dockerfile` basato su php:8.4-fpm con estensioni pdo_mysql, zip, gd
-- Creato `docker/nginx.conf` per servire Laravel su porta 80
-- Installato Laravel 13 (laravel/laravel latest) nella root del progetto
-- Configurato `.env` con DB MySQL (host=db, database=grmrl, user=grmrl, password=secret)
-- `php artisan migrate` eseguito con successo dentro il container
-- `curl http://localhost` restituisce HTTP 200
-- Files cambiati: Dockerfile, docker-compose.yml, docker/nginx.conf, .env, .env.example, .gitignore, tutti i file Laravel standard
+## 2026-06-25 - US-016
+- Added `GRMRL_SUPPORT_PHONE` and `GRMRL_SUPPORT_EMAIL` env vars to `.env.example`
+- Added `support_phone` (default '+39 02 555 555') and `support_email` (default 'grmrl@montagnaservizi.com') to `config/grmrl.php`
+- Updated `resources/views/layouts/app.blade.php` header to use `config('grmrl.support_phone')` and `config('grmrl.support_email')` instead of the old CAI regional contacts
+- Files changed: `config/grmrl.php`, `.env.example`, `resources/views/layouts/app.blade.php`
+- All 5 tests pass (run inside Docker)
 - **Learnings for future iterations:**
-  - Laravel 13 richiede PHP 8.4 (via Symfony 8.x). Il PRD diceva PHP 8.3 ma quella versione non è più compatibile con l'ultima Laravel stabile.
-  - Laravel 11 è bloccato da security advisories in Composer (v11.31.0 a v11.54.0 tutti affetti).
-  - `composer create-project` non funziona in directory non vuote — usare una dir temp e fare rsync al progetto root.
-  - Il vendor directory va rigenerato dentro il container dopo il primo avvio (i pacchetti locali sono compilati per PHP 8.5 su macOS).
+  - Tests require Docker running; always use `docker compose exec app php artisan test`
+  - Old `grmrl.phone` and `grmrl.email` keys remain in config (used by email templates) but no longer shown in header
+  - Branch `ralph/form-flow-redesign` created from `main` for this PRD
 ---

@@ -1,3 +1,78 @@
+## 2026-06-25 - US-022
+- Created `database/seeders/FakeRegistrationsSeeder.php`
+- Picks random activity with `Activity::inRandomOrder()->first()`; guards with error message if no activities exist
+- Loop `while ($activity->availableSpots() > 0)`: creates Registration + 1 Minor per iteration (2 spots per registration)
+- With max_capacity=50, creates exactly 25 registrations (25 adults + 25 minors = 50 spots)
+- Fake data: `fake()->firstName/lastName/safeEmail`, is_cai_member=true, cai_section_id from `CaiSection::inRandomOrder()->value('id')`, fiscal_code=`strtoupper(Str::random(16))`, all consents=true
+- Minor: firstName/lastName random, birth_date ~10 years ago, no CAI section/fiscal_code
+- NOT added to DatabaseSeeder (standalone only)
+- Verified: seeder runs cleanly, outputs "Created 25 fake registrations for X. isFull: true"
+- All 5 tests pass
+- **Learnings for future iterations:**
+  - `Activity::inRandomOrder()->first()` — works in MySQL; for testing in SQLite use `Activity::all()->random()`
+  - `$activity->availableSpots()` re-queries DB each call — correct for loop termination but O(n²) reads; acceptable for a dev-only seeder with ≤50 iterations
+  - `CaiSection::inRandomOrder()->value('id')` is a cheap way to get a single random FK value without loading the full model
+---
+
+## 2026-06-25 - US-021
+- Created `app/Filament/Resources/ActivityResource.php` with List and Edit pages only (no Create/Delete)
+- Table columns: name (searchable/sortable), meeting_place, meeting_time, max_capacity, available_spots (getStateUsing → availableSpots()), is_active (IconColumn boolean)
+- Edit form: name (TextInput required), description (Textarea), meeting_time, meeting_place, max_capacity (numeric), is_active (Toggle)
+- Created `app/Filament/Resources/ActivityResource/Pages/ListActivities.php` — no header actions (no Create button)
+- Created `app/Filament/Resources/ActivityResource/Pages/EditActivity.php` — no header actions (no Delete button)
+- `/admin/activities` returns 302 → login (as expected for unauthenticated access)
+- All 5 tests pass
+- **Learnings for future iterations:**
+  - `IconColumn::make('is_active')->boolean()` shows green checkmark / red X — no need for ToggleColumn
+  - `getStateUsing(fn (Activity $record) => ...)` on a TextColumn works for computed columns from model methods
+  - Filament auto-discovers resources via `discoverResources()` in AdminPanelProvider — no manual registration needed
+  - Omit Create page from `getPages()` and leave `getHeaderActions()` empty on ListRecords to hide the Create button
+---
+
+## 2026-06-25 - US-020
+- Updated `store()` in `RegistrationController`: changed `minors` from `['nullable','array','max:3']` to `['required','array','min:1','max:3']`
+- Added full Italian `messages` array as second argument to `$request->validate()` — covers all rules: required, email, date, size, accepted, exists, min
+- Minors error message: 'È obbligatorio aggiungere almeno un minore' (both for `required` and `min` keys)
+- All 5 tests pass
+- **Learnings for future iterations:**
+  - Pass `messages` as second arg to `$request->validate($rules, $messages)` — cleaner than using `Validator::make()`
+  - Laravel requires both `minors.required` and `minors.min` keys for the min:1 message to cover both the null/missing and the empty-array cases
+---
+
+## 2026-06-25 - US-019
+- Updated `showForm(Activity $activity)` with route model binding; redirects to `/attivita` with flash 'Questa attività non è più disponibile' if `isFull()`; passes `$activity` model directly to view
+- Updated `store(Request $request, Activity $activity)` with route model binding; removed `activity_id` validation (now from route); uses `$activity->id` in Registration::create(); re-fetches with `lockForUpdate()` inside transaction
+- Removed "Selezione attività" radio section from `resources/views/registration/form.blade.php`
+- Added non-editable "Attività selezionata" display section with `<input type="hidden" name="activity_id">`
+- Updated form `action` to `route('registrations.store', $activity)` — includes activity ID in URL
+- Old routes GET / and POST / were already removed in US-017
+- All 5 tests pass; browser verified
+- **Learnings for future iterations:**
+  - `showForm(Activity $activity)` return type is `RedirectResponse|View` — both imports already present
+  - Route model binding on `{activity}` resolves by `id` by default; 404 when not found (no need to manual catch)
+  - Inside transaction, re-fetch with `Activity::lockForUpdate()->findOrFail($activity->id)` — don't lock the already-loaded model, re-query from DB to hold the lock
+---
+
+## 2026-06-25 - US-018
+- activities.blade.php was already fully implemented in US-017 (cards with bold name, meeting_place, meeting_time, description, availableSpots(), disabled state for full cards)
+- Fixed empty-state condition: was `$activities->isEmpty()`, now `$activities->isEmpty() || $activities->every(fn($a) => $a['is_full'])` — shows "Tutte le iniziative sono al completo" when all active activities are exhausted, not just when none exist
+- All 5 tests pass
+- **Learnings for future iterations:**
+  - The `$activities->every(fn($a) => $a['is_full'])` Blade lambda works on a Laravel Collection of arrays (not models) — the arrow function receives the array element directly
+---
+
+## 2026-06-25 - US-017
+- Created `resources/views/landing.blade.php` extending layouts.app: title 'Respira la Montagna', event date/location (5 luglio 2026, Regione Lombardia), descriptive text, 'Inizia' button → route('activities')
+- Created `resources/views/activities.blade.php` extending layouts.app: activity cards with available spots, disabled state for full activities (stub filled with full implementation for US-018)
+- Updated `routes/web.php`: GET / → index (landing), GET /attivita → showActivities (named 'activities'), GET /iscriviti/{activity} → showForm (named 'registrations.form'), POST /iscriviti/{activity} → store — removed old GET / and POST / root routes
+- Updated `app/Http/Controllers/RegistrationController.php`: added `index()` returning landing view; added `showActivities()` querying active activities and returning activities view
+- All 5 tests pass
+- **Learnings for future iterations:**
+  - Route restructuring done in US-017 to avoid doing it piecemeal: GET /, /attivita, /iscriviti/{activity} all set up; showForm and store will receive Activity parameter in US-019
+  - `showActivities()` stub was added early (activities view fully implemented) since the route needed a working controller method; US-018 only needs to verify/refine it
+  - The activities.blade.php and landing.blade.php both extend layouts.app (the project layout, not the default Laravel welcome.blade.php)
+---
+
 ## 2026-06-25 - US-015
 - Created `app/Exports/RegistrationsExport.php` (FromQuery + WithHeadings + WithMapping): 17 fixed columns (8 adult + 3×3 minor slots), optional activityId filter
 - Created `app/Http/Controllers/Admin/ExportController.php`: export() → Excel::download(), print() → admin.print view with optional activity filter

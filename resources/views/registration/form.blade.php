@@ -6,7 +6,7 @@
     <p class="text-gray-600">5 luglio 2026 – Giornata Regionale della Montagna, Regione Lombardia</p>
 </div>
 
-<form method="POST" action="{{ route('registrations.store') }}" novalidate>
+<form method="POST" action="{{ route('registrations.store', $activity) }}" novalidate>
     @csrf
 
     {{-- Dati adulto --}}
@@ -370,57 +370,26 @@
 
     </div>{{-- end x-data minori --}}
 
-    {{-- Selezione attività --}}
+    {{-- Attività selezionata --}}
     <div class="mt-6 bg-white rounded-xl shadow-sm p-6">
-        <h3 class="text-lg font-semibold text-gray-800 border-b pb-2 mb-4">Scegli l'attività <span class="text-red-500">*</span></h3>
+        <h3 class="text-lg font-semibold text-gray-800 border-b pb-2 mb-4">Attività selezionata</h3>
 
-        @error('activity_id')
+        @error('activity')
             <p class="text-red-500 text-xs mb-3">{{ $message }}</p>
         @enderror
 
-        <div class="space-y-3">
-            @foreach ($activities as $activity)
-                @php
-                    $spots = $activity['available_spots'];
-                    $isFull = $activity['is_full'];
-                    $oldId = old('activity_id');
-                @endphp
-                <label class="block cursor-pointer {{ $isFull ? 'opacity-60 cursor-not-allowed' : '' }}">
-                    <div class="flex items-start gap-3 border rounded-lg p-4 transition-colors
-                        {{ $isFull ? 'bg-gray-50 border-gray-200' : 'hover:border-blue-400 hover:bg-blue-50 border-gray-200' }}
-                        {{ $oldId == $activity['id'] ? 'border-blue-500 bg-blue-50' : '' }}
-                    ">
-                        <input
-                            type="radio"
-                            name="activity_id"
-                            value="{{ $activity['id'] }}"
-                            {{ $isFull ? 'disabled' : '' }}
-                            {{ $oldId == $activity['id'] ? 'checked' : '' }}
-                            required
-                            class="mt-1 w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500 shrink-0"
-                        >
-                        <div class="flex-1 min-w-0">
-                            <p class="font-bold text-gray-900">{{ $activity['name'] }}</p>
-                            <p class="text-sm text-gray-600 mt-1">{{ $activity['description'] }}</p>
-                            <div class="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-sm text-gray-500">
-                                <span><span class="font-medium">Orario ritrovo:</span> {{ $activity['meeting_time'] }}</span>
-                                <span><span class="font-medium">Partenza:</span> {{ $activity['meeting_place'] }}</span>
-                            </div>
-                            <p class="mt-2 text-sm font-medium
-                                {{ $isFull ? 'text-red-600' : ($spots <= 5 ? 'text-orange-500' : 'text-green-600') }}"
-                            >
-                                @if ($isFull)
-                                    Attività al completo
-                                @elseif ($spots <= 5)
-                                    Solo {{ $spots }} {{ $spots === 1 ? 'posto disponibile' : 'posti disponibili' }}
-                                @else
-                                    {{ $spots }} posti disponibili
-                                @endif
-                            </p>
-                        </div>
-                    </div>
-                </label>
-            @endforeach
+        <input type="hidden" name="activity_id" value="{{ $activity->id }}">
+
+        <div class="bg-gray-50 rounded-lg p-4">
+            <p class="font-bold text-gray-900 text-base">{{ $activity->name }}</p>
+            @if($activity->description)
+                <p class="text-sm text-gray-600 mt-1">{{ $activity->description }}</p>
+            @endif
+            <div class="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-sm text-gray-500">
+                <span><span class="font-medium">Orario ritrovo:</span> {{ $activity->meeting_time }}</span>
+                <span><span class="font-medium">Partenza:</span> {{ $activity->meeting_place }}</span>
+            </div>
+            <p class="mt-2 text-sm font-medium text-green-600">{{ $activity->availableSpots() }} posti disponibili</p>
         </div>
     </div>
 

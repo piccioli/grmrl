@@ -14,25 +14,40 @@ use Illuminate\View\View;
 
 class RegistrationController extends Controller
 {
-    public function showForm(): View
+    public function index(): View
+    {
+        return view('landing');
+    }
+
+    public function showActivities(): View
     {
         $activities = Activity::where('is_active', true)
             ->orderBy('id')
             ->get()
             ->map(fn (Activity $a) => [
-                'id' => $a->id,
-                'name' => $a->name,
-                'description' => $a->description,
-                'meeting_time' => $a->meeting_time,
-                'meeting_place' => $a->meeting_place,
+                'id'              => $a->id,
+                'name'            => $a->name,
+                'description'     => $a->description,
+                'meeting_time'    => $a->meeting_time,
+                'meeting_place'   => $a->meeting_place,
                 'available_spots' => $a->availableSpots(),
-                'is_full' => $a->isFull(),
+                'is_full'         => $a->isFull(),
             ]);
 
-        return view('registration.form', compact('activities'));
+        return view('activities', compact('activities'));
     }
 
-    public function store(Request $request): RedirectResponse
+    public function showForm(Activity $activity): RedirectResponse|View
+    {
+        if ($activity->isFull()) {
+            return redirect()->route('activities')
+                ->with('error', 'Questa attività non è più disponibile');
+        }
+
+        return view('registration.form', compact('activity'));
+    }
+
+    public function store(Request $request, Activity $activity): RedirectResponse
     {
         $isCaiMember = $request->boolean('is_cai_member');
 
@@ -45,24 +60,46 @@ class RegistrationController extends Controller
             'is_cai_member'                 => ['nullable', 'boolean'],
             'cai_section_id'                => [Rule::requiredIf($isCaiMember), 'nullable', 'exists:cai_sections,id'],
             'fiscal_code'                   => [Rule::requiredIf(! $isCaiMember), 'nullable', 'string', 'size:16'],
-            'activity_id'                   => ['required', 'integer', 'exists:activities,id'],
             'privacy_accepted'              => ['accepted'],
             'photo_release_accepted'        => ['accepted'],
             'rules_accepted'               => ['accepted'],
             'weather_cancellation_accepted' => ['accepted'],
             'equipment_check_accepted'      => ['accepted'],
-            'minors'                        => ['nullable', 'array', 'max:3'],
+            'minors'                        => ['required', 'array', 'min:1', 'max:3'],
             'minors.*.first_name'           => ['required', 'string', 'max:255'],
             'minors.*.last_name'            => ['required', 'string', 'max:255'],
             'minors.*.birth_date'           => ['required', 'date'],
+        ], [
+            'first_name.required'                    => 'Il nome è obbligatorio.',
+            'last_name.required'                     => 'Il cognome è obbligatorio.',
+            'email.required'                         => "L'indirizzo email è obbligatorio.",
+            'email.email'                            => "L'indirizzo email non è valido.",
+            'phone.required'                         => 'Il numero di telefono è obbligatorio.',
+            'birth_date.required'                    => 'La data di nascita è obbligatoria.',
+            'birth_date.date'                        => 'La data di nascita non è valida.',
+            'cai_section_id.required'                => 'La sezione CAI è obbligatoria per i soci.',
+            'cai_section_id.exists'                  => 'La sezione CAI selezionata non è valida.',
+            'fiscal_code.required'                   => 'Il codice fiscale è obbligatorio per i non soci.',
+            'fiscal_code.size'                       => 'Il codice fiscale deve essere di 16 caratteri.',
+            'privacy_accepted.accepted'              => 'È necessario accettare la politica sulla privacy.',
+            'photo_release_accepted.accepted'        => "È necessario accettare la liberatoria foto/video.",
+            'rules_accepted.accepted'                => 'È necessario accettare il regolamento.',
+            'weather_cancellation_accepted.accepted' => "È necessario accettare le condizioni di annullamento per maltempo.",
+            'equipment_check_accepted.accepted'      => "È necessario accettare le condizioni sull'attrezzatura.",
+            'minors.required'                        => 'È obbligatorio aggiungere almeno un minore.',
+            'minors.min'                             => 'È obbligatorio aggiungere almeno un minore.',
+            'minors.*.first_name.required'           => 'Il nome del minore è obbligatorio.',
+            'minors.*.last_name.required'            => 'Il cognome del minore è obbligatorio.',
+            'minors.*.birth_date.required'           => 'La data di nascita del minore è obbligatoria.',
+            'minors.*.birth_date.date'               => 'La data di nascita del minore non è valida.',
         ]);
 
         $registration = null;
 
-        DB::transaction(function () use ($request, &$registration) {
-            $activity = Activity::lockForUpdate()->findOrFail($request->integer('activity_id'));
+        DB::transaction(function () use ($request, $activity, &$registration) {
+            $locked = Activity::lockForUpdate()->findOrFail($activity->id);
 
-            if ($activity->isFull()) {
+            if ($locked->isFull()) {
                 return;
             }
 
@@ -75,7 +112,7 @@ class RegistrationController extends Controller
                 'is_cai_member'                 => $request->boolean('is_cai_member'),
                 'cai_section_id'                => $request->input('cai_section_id') ?: null,
                 'fiscal_code'                   => $request->input('fiscal_code') ?: null,
-                'activity_id'                   => $request->integer('activity_id'),
+                'activity_id'                   => $activity->id,
                 'privacy_accepted'              => true,
                 'photo_release_accepted'        => true,
                 'rules_accepted'               => true,
@@ -100,7 +137,7 @@ class RegistrationController extends Controller
         if ($registration === null) {
             return redirect()->back()
                 ->withInput()
-                ->withErrors(['activity_id' => "Siamo spiacenti, i posti per questa attività sono esauriti. Scegli un'altra attività."]);
+                ->withErrors(['activity' => "Siamo spiacenti, i posti per questa attività sono esauriti."]);
         }
 
         Mail::to($registration->email)->send(new RegistrationConfirmation($registration));
