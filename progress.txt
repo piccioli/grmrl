@@ -1,3 +1,15 @@
+## 2026-06-25 - US-017
+- Created `resources/views/landing.blade.php` extending layouts.app: title 'Respira la Montagna', event date/location (5 luglio 2026, Regione Lombardia), descriptive text, 'Inizia' button → route('activities')
+- Created `resources/views/activities.blade.php` extending layouts.app: activity cards with available spots, disabled state for full activities (stub filled with full implementation for US-018)
+- Updated `routes/web.php`: GET / → index (landing), GET /attivita → showActivities (named 'activities'), GET /iscriviti/{activity} → showForm (named 'registrations.form'), POST /iscriviti/{activity} → store — removed old GET / and POST / root routes
+- Updated `app/Http/Controllers/RegistrationController.php`: added `index()` returning landing view; added `showActivities()` querying active activities and returning activities view
+- All 5 tests pass
+- **Learnings for future iterations:**
+  - Route restructuring done in US-017 to avoid doing it piecemeal: GET /, /attivita, /iscriviti/{activity} all set up; showForm and store will receive Activity parameter in US-019
+  - `showActivities()` stub was added early (activities view fully implemented) since the route needed a working controller method; US-018 only needs to verify/refine it
+  - The activities.blade.php and landing.blade.php both extend layouts.app (the project layout, not the default Laravel welcome.blade.php)
+---
+
 ## 2026-06-25 - US-015
 - Created `app/Exports/RegistrationsExport.php` (FromQuery + WithHeadings + WithMapping): 17 fixed columns (8 adult + 3×3 minor slots), optional activityId filter
 - Created `app/Http/Controllers/Admin/ExportController.php`: export() → Excel::download(), print() → admin.print view with optional activity filter
