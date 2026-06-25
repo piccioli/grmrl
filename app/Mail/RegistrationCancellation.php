@@ -1,0 +1,41 @@
+<?php
+
+namespace App\Mail;
+
+use App\Models\Registration;
+use Illuminate\Bus\Queueable;
+use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Content;
+use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Queue\SerializesModels;
+
+class RegistrationCancellation extends Mailable
+{
+    use Queueable, SerializesModels;
+
+    public string $caiLogoBase64;
+
+    public string $msLogoBase64;
+
+    public function __construct(public Registration $registration)
+    {
+        $registration->load(['activity', 'caiSection']);
+
+        $this->caiLogoBase64 = base64_encode(file_get_contents(public_path('images/cai-logo.png')));
+        $this->msLogoBase64 = base64_encode(file_get_contents(public_path('images/ms-logo.png')));
+    }
+
+    public function envelope(): Envelope
+    {
+        return new Envelope(
+            subject: 'Cancellazione iscrizione – Respira la Montagna – 5 luglio 2026',
+        );
+    }
+
+    public function content(): Content
+    {
+        return new Content(
+            view: 'emails.registration-cancellation',
+        );
+    }
+}

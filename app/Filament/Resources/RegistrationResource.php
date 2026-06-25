@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\RegistrationResource\Pages;
+use App\Mail\RegistrationCancellation;
 use App\Models\Activity;
 use App\Models\Registration;
 use Filament\Forms\Components\TextInput;
@@ -17,6 +18,7 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Mail;
 
 class RegistrationResource extends Resource
 {
@@ -87,8 +89,10 @@ class RegistrationResource extends Resource
                     ->modalDescription(fn (Registration $record): string => 'Sei sicuro di voler eliminare l\'iscrizione di '.$record->first_name.' '.$record->last_name.'? L\'operazione non è reversibile.')
                     ->modalSubmitActionLabel('Sì, elimina')
                     ->action(function (Registration $record): void {
+                        $mailable = new RegistrationCancellation($record);
                         $record->minors()->delete();
                         $record->delete();
+                        Mail::to($mailable->registration->email)->send($mailable);
                     }),
             ])
             ->defaultSort('created_at', 'desc');
