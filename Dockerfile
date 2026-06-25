@@ -1,3 +1,12 @@
+# Stage 1: build asset frontend con Vite
+FROM node:20-alpine AS node-builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+# Stage 2: immagine PHP-FPM di produzione
 FROM php:8.4-fpm
 
 RUN apt-get update && apt-get install -y \
@@ -23,6 +32,8 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
 
 COPY . .
+COPY --from=node-builder /app/public/build ./public/build
 
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
+RUN composer install --no-dev --optimize-autoloader \
+    && chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
     && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
