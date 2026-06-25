@@ -22,14 +22,14 @@
             <div class="max-w-2xl mx-auto px-4 py-2 flex flex-wrap gap-x-6 gap-y-1">
                 <span>
                     <span class="font-medium">Supporto:</span>
-                    <a href="tel:{{ config('grmrl.phone') }}" class="hover:underline">{{ config('grmrl.phone') }}</a>
+                    <a href="tel:{{ config('grmrl.support_phone') }}" class="hover:underline">{{ config('grmrl.support_phone') }}</a>
                 </span>
                 <span>
                     <span class="font-medium">Orari:</span> {{ config('grmrl.support_hours') }}
                 </span>
                 <span>
                     <span class="font-medium">Email:</span>
-                    <a href="mailto:{{ config('grmrl.email') }}" class="hover:underline">{{ config('grmrl.email') }}</a>
+                    <a href="mailto:{{ config('grmrl.support_email') }}" class="hover:underline">{{ config('grmrl.support_email') }}</a>
                 </span>
             </div>
         </div>
