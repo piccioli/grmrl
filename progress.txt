@@ -1,3 +1,20 @@
+## 2026-06-25 - US-015
+- Created `app/Exports/RegistrationsExport.php` (FromQuery + WithHeadings + WithMapping): 17 fixed columns (8 adult + 3×3 minor slots), optional activityId filter
+- Created `app/Http/Controllers/Admin/ExportController.php`: export() → Excel::download(), print() → admin.print view with optional activity filter
+- Created `resources/views/admin/print.blade.php`: standalone print page, table (name/email/phone/section/minors), @media print hides .no-print div
+- Updated `routes/web.php`: `Route::middleware(['auth'])->prefix('admin/registrations')` group for export + print routes
+- Updated `app/Filament/Resources/RegistrationResource/Pages/ListRegistrations.php`: added getHeaderActions() with 'Esporta Excel' + 'Vista stampabile' actions using current tableFilters['activity_id']['value']
+- Routes: admin/registrations/export (admin.export), admin/registrations/print (admin.print) — both auth-protected
+- All 5 tests pass
+- **Learnings for future iterations:**
+  - `RegistrationsExport` uses `FromQuery` not `FromCollection` — allows Eloquent scoping + lazy loading; `WithMapping` maps each model to a flat array row
+  - Fixed-column approach for minors (up to 3 slots) vs dynamic rows — simpler for admin spreadsheets
+  - Filament `getHeaderActions()` on `ListRecords` page: use `Filament\Actions\Action` (not `Filament\Tables\Actions\Action`); `->openUrlInNewTab()` for file downloads
+  - `$this->tableFilters['activity_id']['value']` accesses SelectFilter state in Livewire component
+  - Print route placed before `/{record}` in route list — Laravel matches more specific paths first; works correctly
+  - `array_filter([...])` on URL params removes null/empty values cleanly
+---
+
 ## 2026-06-25 - US-014
 - Created `app/Filament/Resources/RegistrationResource.php` with table (8 columns), 2 filters, ViewAction; infolist with 4 sections
 - Created `app/Filament/Resources/RegistrationResource/Pages/ListRegistrations.php`

@@ -260,8 +260,8 @@
         "Typecheck passes"
       ],
       "priority": 15,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "RegistrationsExport (FromQuery+WithHeadings+WithMapping) in app/Exports/ — 17 columns: adult data (8) + up to 3 minors (3 cols each). Optional activityId filter passed as constructor arg. ExportController in app/Http/Controllers/Admin/: export() returns Excel::download(), print() returns admin.print Blade view. Both routes GET /admin/registrations/export and GET /admin/registrations/print protected by auth middleware. ListRegistrations header actions: 'Esporta Excel' and 'Vista stampabile' — each passes current activity_id filter via URL. Print view: standalone HTML (no Filament layout), print button, table with adult name/email/phone/section/minors list, @media print hides .no-print. All 5 tests pass."
     }
   ]
 }
