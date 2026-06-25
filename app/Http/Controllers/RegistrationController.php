@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\RegistrationConfirmation;
 use App\Models\Activity;
+use App\Models\CaiSection;
 use App\Models\Registration;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -44,7 +45,15 @@ class RegistrationController extends Controller
                 ->with('error', 'Questa attività non è più disponibile');
         }
 
-        return view('registration.form', compact('activity'));
+        $preloadedSectionName = '';
+        if ($oldSectionId = old('cai_section_id')) {
+            $section = CaiSection::find($oldSectionId);
+            if ($section) {
+                $preloadedSectionName = $section->name . ($section->province ? ' (' . $section->province . ')' : '');
+            }
+        }
+
+        return view('registration.form', compact('activity', 'preloadedSectionName'));
     }
 
     public function store(Request $request, Activity $activity): RedirectResponse

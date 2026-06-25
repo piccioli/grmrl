@@ -12,7 +12,7 @@
     novalidate
     x-data="{
         isCaiMember: {{ old('is_cai_member') ? 'true' : 'false' }},
-        sectionQuery: '{{ old('_section_name', '') }}',
+        sectionQuery: @json($preloadedSectionName),
         sectionResults: [],
         selectedSectionId: '{{ old('cai_section_id', '') }}',
         showDropdown: false,
