@@ -31,8 +31,8 @@
 
 <div class="text-center">
     <a href="{{ route('activities') }}"
-       class="inline-block bg-blue-700 hover:bg-blue-800 text-white font-semibold px-10 py-4 rounded-lg text-lg transition-colors">
-        Inizia
+       class="inline-block bg-blue-700 hover:bg-blue-800 text-white font-bold px-12 py-4 rounded-lg text-xl tracking-wide transition-colors shadow-md hover:shadow-lg">
+        INIZIA
     </a>
 </div>
 @endsection
