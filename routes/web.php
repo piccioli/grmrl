@@ -8,4 +8,3 @@ Route::get('/attivita', [RegistrationController::class, 'showActivities'])->name
 Route::get('/iscriviti/{activity}', [RegistrationController::class, 'showForm'])->name('registrations.form');
 Route::post('/iscriviti/{activity}', [RegistrationController::class, 'store'])->name('registrations.store');
 Route::get('/conferma', [RegistrationController::class, 'confirm'])->name('registrations.confirm');
-

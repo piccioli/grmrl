@@ -16,6 +16,7 @@ class FakeRegistrationsSeeder extends Seeder
 
         if ($activities->isEmpty()) {
             $this->command->error('No activities found. Run ActivitySeeder first.');
+
             return;
         }
 
@@ -65,29 +66,29 @@ class FakeRegistrationsSeeder extends Seeder
     private function createRegistration(Activity $activity, ?int $sectionId): void
     {
         $registration = Registration::create([
-            'first_name'                    => fake()->firstName(),
-            'last_name'                     => fake()->lastName(),
-            'email'                         => fake()->unique()->safeEmail(),
-            'phone'                         => fake()->numerify('3## ### ####'),
-            'birth_date'                    => fake()->date('Y-m-d', '-20 years'),
-            'is_cai_member'                 => true,
-            'cai_section_id'                => $sectionId,
-            'fiscal_code'                   => strtoupper(Str::random(16)),
-            'activity_id'                   => $activity->id,
-            'privacy_accepted'              => true,
-            'photo_release_accepted'        => true,
-            'rules_accepted'               => true,
+            'first_name' => fake()->firstName(),
+            'last_name' => fake()->lastName(),
+            'email' => fake()->unique()->safeEmail(),
+            'phone' => fake()->numerify('3## ### ####'),
+            'birth_date' => fake()->date('Y-m-d', '-20 years'),
+            'is_cai_member' => true,
+            'cai_section_id' => $sectionId,
+            'fiscal_code' => strtoupper(Str::random(16)),
+            'activity_id' => $activity->id,
+            'privacy_accepted' => true,
+            'photo_release_accepted' => true,
+            'rules_accepted' => true,
             'weather_cancellation_accepted' => true,
-            'equipment_check_accepted'      => true,
+            'equipment_check_accepted' => true,
         ]);
 
         $registration->minors()->create([
-            'first_name'     => fake()->firstName(),
-            'last_name'      => fake()->lastName(),
-            'birth_date'     => fake()->date('Y-m-d', '-10 years'),
-            'is_cai_member'  => false,
+            'first_name' => fake()->firstName(),
+            'last_name' => fake()->lastName(),
+            'birth_date' => fake()->date('Y-m-d', '-10 years'),
+            'is_cai_member' => false,
             'cai_section_id' => null,
-            'fiscal_code'    => null,
+            'fiscal_code' => null,
         ]);
     }
 }

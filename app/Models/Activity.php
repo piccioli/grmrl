@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Activity extends Model
 {
     use HasFactory;
+
     protected $fillable = ['name', 'description', 'meeting_time', 'meeting_place', 'max_capacity', 'is_active', 'latitude', 'longitude'];
 
     protected $casts = [

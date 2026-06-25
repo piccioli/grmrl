@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Registration extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'first_name',
         'last_name',

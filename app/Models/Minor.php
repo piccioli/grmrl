@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Minor extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'registration_id',
         'first_name',
