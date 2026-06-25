@@ -424,5 +424,115 @@
         </div>
     </div>
 
+    {{-- Consensi obbligatori --}}
+    <div class="mt-6 bg-white rounded-xl shadow-sm p-6 space-y-4">
+        <h3 class="text-lg font-semibold text-gray-800 border-b pb-2">Consensi obbligatori</h3>
+
+        {{-- 1. Privacy --}}
+        <div>
+            <label class="flex items-start gap-3 cursor-pointer">
+                <input
+                    type="checkbox"
+                    name="privacy_accepted"
+                    value="1"
+                    {{ old('privacy_accepted') ? 'checked' : '' }}
+                    class="mt-0.5 w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 shrink-0"
+                >
+                <span class="text-sm text-gray-700">
+                    Accetto la politica sulla privacy (GDPR) per il trattamento dei miei dati personali da parte del GR CAI Lombardia. <span class="text-red-500">*</span>
+                </span>
+            </label>
+            @error('privacy_accepted')
+                <p class="text-red-500 text-xs mt-1 ml-7">{{ $message }}</p>
+            @enderror
+        </div>
+
+        {{-- 2. Liberatoria foto/video --}}
+        <div>
+            <label class="flex items-start gap-3 cursor-pointer">
+                <input
+                    type="checkbox"
+                    name="photo_release_accepted"
+                    value="1"
+                    {{ old('photo_release_accepted') ? 'checked' : '' }}
+                    class="mt-0.5 w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 shrink-0"
+                >
+                <span class="text-sm text-gray-700">
+                    Autorizzo l'utilizzo di foto e video che mi ritraggono nell'ambito della GRMRL per le comunicazioni del GR CAI Lombardia. <span class="text-red-500">*</span>
+                </span>
+            </label>
+            @error('photo_release_accepted')
+                <p class="text-red-500 text-xs mt-1 ml-7">{{ $message }}</p>
+            @enderror
+        </div>
+
+        {{-- 3. Regolamento --}}
+        <div>
+            <label class="flex items-start gap-3 cursor-pointer">
+                <input
+                    type="checkbox"
+                    name="rules_accepted"
+                    value="1"
+                    {{ old('rules_accepted') ? 'checked' : '' }}
+                    class="mt-0.5 w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 shrink-0"
+                >
+                <span class="text-sm text-gray-700">
+                    Ho letto la locandina, compreso l'itinerario, il dislivello e la durata. Dichiaro che l'escursione è alla mia portata. <span class="text-red-500">*</span>
+                </span>
+            </label>
+            @error('rules_accepted')
+                <p class="text-red-500 text-xs mt-1 ml-7">{{ $message }}</p>
+            @enderror
+        </div>
+
+        {{-- 4. Maltempo --}}
+        <div>
+            <label class="flex items-start gap-3 cursor-pointer">
+                <input
+                    type="checkbox"
+                    name="weather_cancellation_accepted"
+                    value="1"
+                    {{ old('weather_cancellation_accepted') ? 'checked' : '' }}
+                    class="mt-0.5 w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 shrink-0"
+                >
+                <span class="text-sm text-gray-700">
+                    Accetto che il Direttore di Escursione possa sospendere o interrompere l'escursione in caso di maltempo, rischio, agibilità del sentiero, ostacoli o imprevisti. <span class="text-red-500">*</span>
+                </span>
+            </label>
+            @error('weather_cancellation_accepted')
+                <p class="text-red-500 text-xs mt-1 ml-7">{{ $message }}</p>
+            @enderror
+        </div>
+
+        {{-- 5. Attrezzatura --}}
+        <div>
+            <label class="flex items-start gap-3 cursor-pointer">
+                <input
+                    type="checkbox"
+                    name="equipment_check_accepted"
+                    value="1"
+                    {{ old('equipment_check_accepted') ? 'checked' : '' }}
+                    class="mt-0.5 w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 shrink-0"
+                >
+                <span class="text-sm text-gray-700">
+                    Accetto che il Direttore di Escursione possa impedirmi la partecipazione se non ho l'attrezzatura adeguata. <span class="text-red-500">*</span>
+                </span>
+            </label>
+            @error('equipment_check_accepted')
+                <p class="text-red-500 text-xs mt-1 ml-7">{{ $message }}</p>
+            @enderror
+        </div>
+    </div>
+
+    {{-- Submit --}}
+    <div class="mt-6 flex justify-end">
+        <button
+            type="submit"
+            class="inline-flex items-center gap-2 px-8 py-3 text-base font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-colors shadow-sm"
+        >
+            Invia iscrizione
+        </button>
+    </div>
+
 </form>
 @endsection
