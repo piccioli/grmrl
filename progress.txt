@@ -1,3 +1,17 @@
+## 2026-06-25 - US-019
+- Updated `showForm(Activity $activity)` with route model binding; redirects to `/attivita` with flash 'Questa attività non è più disponibile' if `isFull()`; passes `$activity` model directly to view
+- Updated `store(Request $request, Activity $activity)` with route model binding; removed `activity_id` validation (now from route); uses `$activity->id` in Registration::create(); re-fetches with `lockForUpdate()` inside transaction
+- Removed "Selezione attività" radio section from `resources/views/registration/form.blade.php`
+- Added non-editable "Attività selezionata" display section with `<input type="hidden" name="activity_id">`
+- Updated form `action` to `route('registrations.store', $activity)` — includes activity ID in URL
+- Old routes GET / and POST / were already removed in US-017
+- All 5 tests pass; browser verified
+- **Learnings for future iterations:**
+  - `showForm(Activity $activity)` return type is `RedirectResponse|View` — both imports already present
+  - Route model binding on `{activity}` resolves by `id` by default; 404 when not found (no need to manual catch)
+  - Inside transaction, re-fetch with `Activity::lockForUpdate()->findOrFail($activity->id)` — don't lock the already-loaded model, re-query from DB to hold the lock
+---
+
 ## 2026-06-25 - US-018
 - activities.blade.php was already fully implemented in US-017 (cards with bold name, meeting_place, meeting_time, description, availableSpots(), disabled state for full cards)
 - Fixed empty-state condition: was `$activities->isEmpty()`, now `$activities->isEmpty() || $activities->every(fn($a) => $a['is_full'])` — shows "Tutte le iniziative sono al completo" when all active activities are exhausted, not just when none exist
