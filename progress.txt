@@ -1,3 +1,14 @@
+## 2026-06-25 - US-007
+- Added `HasFactory` trait to Activity, Registration, Minor models
+- Created `database/factories/ActivityFactory.php`, `RegistrationFactory.php`, `MinorFactory.php`
+- Created `tests/Unit/ActivityTest.php` with 3 tests covering all acceptance criteria
+- All 5 tests pass (3 new + 2 existing)
+- **Learnings for future iterations:**
+  - Unit tests touching DB must extend `Tests\TestCase` (not plain `PHPUnit\Framework\TestCase`) and use `RefreshDatabase`
+  - Placing DB-backed tests in `tests/Unit/` works fine as long as they extend Laravel's TestCase
+  - `RegistrationFactory` must use `bothify` for fiscal_code to avoid validation conflicts
+---
+
 ## 2026-06-25 - US-006
 - Created `routes/api.php` with `GET /api/sections` route using `SectionController::class` (invokable)
 - Created `app/Http/Controllers/Api/SectionController.php` — returns [] for query < 2 chars, filters name OR code LIKE '%q%', limits to 15 results

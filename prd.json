@@ -117,8 +117,8 @@
         "Typecheck passes"
       ],
       "priority": 7,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "ActivityFactory, RegistrationFactory, MinorFactory created. HasFactory trait added to Activity, Registration, Minor models. 3 unit tests cover: adult+2 minors=47 spots, 50 registrations=isFull, 0 registrations=50 spots. All pass."
     },
     {
       "id": "US-008",
