@@ -31,6 +31,10 @@
                     <dd class="text-gray-900">{{ $registration->last_name }}</dd>
                 </div>
                 <div>
+                    <dt class="font-medium text-gray-500">Data di nascita</dt>
+                    <dd class="text-gray-900">{{ $registration->birth_date->format('d/m/Y') }}</dd>
+                </div>
+                <div>
                     <dt class="font-medium text-gray-500">Email</dt>
                     <dd class="text-gray-900">{{ $registration->email }}</dd>
                 </div>
@@ -39,10 +43,17 @@
                     <dd class="text-gray-900">{{ $registration->phone }}</dd>
                 </div>
                 <div>
-                    <dt class="font-medium text-gray-500">Sezione CAI</dt>
-                    <dd class="text-gray-900">
-                        {{ $registration->caiSection?->name ?? 'Non socio CAI' }}
-                    </dd>
+                    <dt class="font-medium text-gray-500">Socio CAI</dt>
+                    <dd class="text-gray-900">{{ $registration->is_cai_member ? 'Sì' : 'No' }}</dd>
+                </div>
+                <div>
+                    @if($registration->is_cai_member)
+                        <dt class="font-medium text-gray-500">Sezione CAI</dt>
+                        <dd class="text-gray-900">{{ $registration->caiSection?->name ?? '—' }}</dd>
+                    @else
+                        <dt class="font-medium text-gray-500">Codice Fiscale</dt>
+                        <dd class="text-gray-900 font-mono">{{ $registration->fiscal_code ?? '—' }}</dd>
+                    @endif
                 </div>
             </dl>
         </div>
@@ -83,8 +94,17 @@
                             <dd class="text-gray-900">{{ $minor->birth_date->format('d/m/Y') }}</dd>
                         </div>
                         <div>
-                            <dt class="font-medium text-gray-500">Sezione CAI</dt>
-                            <dd class="text-gray-900">{{ $minor->caiSection?->name ?? 'Non socio CAI' }}</dd>
+                            <dt class="font-medium text-gray-500">Socio CAI</dt>
+                            <dd class="text-gray-900">{{ $minor->is_cai_member ? 'Sì' : 'No' }}</dd>
+                        </div>
+                        <div>
+                            @if($minor->is_cai_member)
+                                <dt class="font-medium text-gray-500">Sezione CAI</dt>
+                                <dd class="text-gray-900">{{ $minor->caiSection?->name ?? '—' }}</dd>
+                            @else
+                                <dt class="font-medium text-gray-500">Codice Fiscale</dt>
+                                <dd class="text-gray-900 font-mono">{{ $minor->fiscal_code ?? '—' }}</dd>
+                            @endif
                         </div>
                     </dl>
                 </div>

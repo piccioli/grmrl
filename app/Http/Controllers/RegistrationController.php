@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\RegistrationConfirmation;
 use App\Models\Activity;
+use App\Models\CaiSection;
 use App\Models\Registration;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -44,7 +45,41 @@ class RegistrationController extends Controller
                 ->with('error', 'Questa attività non è più disponibile');
         }
 
-        return view('registration.form', compact('activity'));
+        $preloadedSectionName = '';
+        if ($oldSectionId = old('cai_section_id')) {
+            $section = CaiSection::find($oldSectionId);
+            if ($section) {
+                $preloadedSectionName = $section->name . ($section->province ? ' (' . $section->province . ')' : '');
+            }
+        }
+
+        $preloadedMinors = [];
+        if ($oldMinors = old('minors')) {
+            $sectionIds = collect($oldMinors)->pluck('cai_section_id')->filter()->unique()->values();
+            $sectionsMap = [];
+            if ($sectionIds->isNotEmpty()) {
+                CaiSection::whereIn('id', $sectionIds)->get()->each(function (CaiSection $s) use (&$sectionsMap) {
+                    $sectionsMap[$s->id] = $s->name . ($s->province ? ' (' . $s->province . ')' : '');
+                });
+            }
+
+            foreach ($oldMinors as $minor) {
+                $sectionId = $minor['cai_section_id'] ?? null;
+                $preloadedMinors[] = [
+                    'first_name'     => $minor['first_name'] ?? '',
+                    'last_name'      => $minor['last_name'] ?? '',
+                    'birth_date'     => $minor['birth_date'] ?? '',
+                    'is_cai_member'  => ! empty($minor['is_cai_member']),
+                    'cai_section_id' => $sectionId ?? '',
+                    'fiscal_code'    => $minor['fiscal_code'] ?? '',
+                    'sectionQuery'   => ($sectionId && isset($sectionsMap[$sectionId])) ? $sectionsMap[$sectionId] : '',
+                    'sectionResults' => [],
+                    'showDropdown'   => false,
+                ];
+            }
+        }
+
+        return view('registration.form', compact('activity', 'preloadedSectionName', 'preloadedMinors'));
     }
 
     public function store(Request $request, Activity $activity): RedirectResponse
@@ -54,7 +89,7 @@ class RegistrationController extends Controller
         $request->validate([
             'first_name'                    => ['required', 'string', 'max:255'],
             'last_name'                     => ['required', 'string', 'max:255'],
-            'email'                         => ['required', 'email', 'max:255'],
+            'email'                         => ['required', 'email', 'max:255', 'unique:registrations,email'],
             'phone'                         => ['required', 'string', 'max:50'],
             'birth_date'                    => ['required', 'date'],
             'is_cai_member'                 => ['nullable', 'boolean'],
@@ -83,6 +118,7 @@ class RegistrationController extends Controller
             'last_name.required'                     => 'Il cognome è obbligatorio.',
             'email.required'                         => "L'indirizzo email è obbligatorio.",
             'email.email'                            => "L'indirizzo email non è valido.",
+            'email.unique'                           => "Questo indirizzo email è già stato utilizzato per un'iscrizione. Ogni partecipante deve usare un'email univoca.",
             'phone.required'                         => 'Il numero di telefono è obbligatorio.',
             'birth_date.required'                    => 'La data di nascita è obbligatoria.',
             'birth_date.date'                        => 'La data di nascita non è valida.',

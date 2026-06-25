@@ -39,10 +39,14 @@
         {{-- Adult data --}}
         <div class="section-title">Dati del partecipante</div>
         <div class="field"><strong>Nome:</strong> {{ $registration->first_name }} {{ $registration->last_name }}</div>
+        <div class="field"><strong>Data di nascita:</strong> {{ $registration->birth_date->format('d/m/Y') }}</div>
+        <div class="field"><strong>Email:</strong> {{ $registration->email }}</div>
+        <div class="field"><strong>Telefono:</strong> {{ $registration->phone }}</div>
         @if($registration->is_cai_member)
             <div class="field"><strong>Socio CAI:</strong> Sì – {{ $registration->caiSection?->name ?? '—' }}</div>
         @else
             <div class="field"><strong>Socio CAI:</strong> No</div>
+            <div class="field"><strong>Codice Fiscale:</strong> {{ $registration->fiscal_code ?? '—' }}</div>
         @endif
 
         {{-- Minors --}}
@@ -56,6 +60,7 @@
                         <div class="field"><strong>Socio CAI:</strong> Sì – {{ $minor->caiSection?->name ?? '—' }}</div>
                     @else
                         <div class="field"><strong>Socio CAI:</strong> No</div>
+                        <div class="field"><strong>Codice Fiscale:</strong> {{ $minor->fiscal_code ?? '—' }}</div>
                     @endif
                 </div>
             @endforeach

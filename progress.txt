@@ -1,3 +1,42 @@
+## 2026-06-25 - US-034
+- Installed `barryvdh/laravel-dompdf` v3.1.2 via `docker-compose exec app composer require barryvdh/laravel-dompdf`
+- Updated `app/Http/Controllers/Admin/ExportController.php`: imported `Barryvdh\DomPDF\Facade\Pdf`, added `activity` to eager loading, set `$generatedAt = now()->format('d/m/Y')`, returns `Pdf::loadView('admin.print', ...)->download('iscrizioni-YYYY-MM-DD.pdf')`
+- Rewrote `resources/views/admin/print.blade.php` as PDF-only view: uses `DejaVu Sans` (dompdf-safe font), inline CSS only, header 'Iscrizioni – Giornata Regionale della Montagna' + generation date, table with columns Nome, Cognome, Email, Telefono, Attività, Socio CAI (Sì/No), Sezione, Minori
+- Route was already defined in `routes/web.php` from a previous iteration
+- All 5 tests pass
+- **Learnings for future iterations:**
+  - Use `DejaVu Sans` as the font family in dompdf views — it's the default embedded font and handles UTF-8 characters (Italian accents); `Arial` alone may not render correctly
+  - `Pdf::loadView('view.name', $data)->download('filename.pdf')` is the dompdf facade pattern — no need to call `->setPaper()` for basic A4 output
+  - The print blade view needs to be purely HTML/CSS — no Alpine.js, no Tailwind, no external assets; dompdf renders HTML to PDF without a browser engine
+  - Pass `$generatedAt` as a pre-formatted string from the controller rather than calling `now()` in the blade template
+---
+
+## 2026-06-25 - US-033
+- Route GET /admin/registrations/export already existed from previous iteration (US-015)
+- `app/Exports/RegistrationsExport.php` already implements FromQuery + WithHeadings + WithMapping with all required columns
+- Fixed filename in `app/Http/Controllers/Admin/ExportController.php`: changed `'iscrizioni.xlsx'` to `'iscrizioni-' . now()->format('Y-m-d') . '.xlsx'`
+- Route returns 302 (auth redirect) when unauthenticated — correct, not 404/500
+- All 5 tests pass
+- **Learnings for future iterations:**
+  - `now()->format('Y-m-d')` inside the controller is the idiomatic way to get today's date in filename; `now()` is Laravel's helper returning a Carbon instance
+  - Previous iterations (US-015) may have implemented features that map to new story IDs in later PRDs — check existing files before re-implementing
+---
+
+## 2026-06-25 - US-031
+- Created `app/Http/Controllers/Api/CheckEmailController.php`: invokable controller, checks `Registration::where('email', $email)->exists()`, returns `{"exists": bool}`
+- Updated `routes/api.php`: added `Route::middleware(['throttle:10,1'])->get('/check-email', CheckEmailController::class)`
+- Refactored `resources/views/registration/form.blade.php`: moved adult `x-data` from inner `<div>` to the `<form>` element so `emailDuplicate` state is accessible to the submit button outside the adult section's scope
+- Added `emailDuplicate: false` state and `async checkEmail(value)` method to the form's x-data; checks regex first, then fetches `/api/check-email`, sets `emailDuplicate = data.exists`; try/catch ensures network failures don't block submission
+- Added `@blur="checkEmail($event.target.value)"` to email input
+- Added `<p x-show="emailDuplicate" x-cloak>` error message below email field
+- Added `:disabled="emailDuplicate"` and `disabled:opacity-50 disabled:cursor-not-allowed` to submit button
+- All 5 tests pass
+- **Learnings for future iterations:**
+  - To share Alpine.js state between the adult section and the submit button (which is outside the adult section), move x-data to the `<form>` element — nested x-data blocks are isolated, but siblings and child non-x-data elements share the form's scope
+  - `throttle:10,1` in Laravel means 10 requests per 1 minute per IP — place it in `Route::middleware([])` not via `->middleware()` on the route group to ensure it applies to a single route
+  - Pass `$event.target.value` to the checkEmail function directly in the blur handler — cleaner than using `$el` or `$refs` inside the method
+---
+
 ## 2026-06-25 - US-028
 - Updated `RegistrationController::store()`: added `->with('registration_id', $registration->id)` to the redirect
 - Updated `RegistrationController::confirm()`: reads `registration_id` from session, loads Registration with `activity`, `minors`, `minors.caiSection`, `caiSection` relations via eager loading; passes `$registration` (or `null`) to the view

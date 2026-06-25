@@ -1,30 +1,33 @@
 {
   "project": "GRMRL",
-  "branchName": "ralph/iterazione-3",
-  "description": "Terza iterazione: correzione denominazione organizzazione, bottone INIZIA, footer contatti allineati, errore minori obbligatori, validazione sezione CAI per minori soci, pagina /conferma con riepilogo completo.",
+  "branchName": "ralph/iterazione-4",
+  "description": "Quarta iterazione: validazione email duplicata, persistenza dati form su errore, export Excel e stampa PDF admin, recap completo su pagina conferma ed email.",
   "userStories": [
     {
-      "id": "US-023",
-      "title": "Correzione denominazione organizzazione",
-      "description": "As a developer, I want to fix the organization name so that the correct official name is used consistently.",
+      "id": "US-032",
+      "title": "Validazione email duplicata al submit (server-side)",
+      "description": "As a developer, I want the server to reject duplicate emails on form submission so that no two registrations share the same email address.",
       "acceptanceCriteria": [
-        "Sostituire ogni occorrenza di 'Club Alpino Italiano – Sezione Lombardia' con 'Club Alpino Italiano – Gruppo Regionale Lombardia' in tutti i file blade e PHP (escluso vendor e storage)",
-        "Nessuna occorrenza del testo vecchio rimane nel codebase (verificabile con grep)",
-        "Typecheck passes",
-        "Verify in browser using dev-browser skill"
+        "In RegistrationController::store() aggiungere la regola 'unique:registrations,email' nel campo email",
+        "Il messaggio di errore in italiano è: 'Questo indirizzo email è già stato utilizzato per un\\'iscrizione. Ogni partecipante deve usare un\\'email univoca.'",
+        "In caso di errore, il form torna con withInput() preservando tutti i dati già inseriti",
+        "Typecheck passes"
       ],
       "priority": 1,
       "passes": true,
       "notes": ""
     },
     {
-      "id": "US-024",
-      "title": "Bottone INIZIA maiuscolo con padding corretto",
-      "description": "As a visitor, I want the CTA button on the landing page to be clearly styled and readable so that it attracts attention.",
+      "id": "US-031",
+      "title": "Validazione email duplicata on blur (client-side)",
+      "description": "As a user, I want to be immediately notified when I enter an already-used email so I can correct it before submitting.",
       "acceptanceCriteria": [
-        "Il testo nel template HTML è 'INIZIA' (tutto maiuscolo, non via classe CSS uppercase su testo minuscolo)",
-        "Il padding è visivamente equilibrato (es. px-12 py-4 o equivalente)",
-        "Il bottone ha dimensione e aspetto da CTA principale chiaramente cliccabile",
+        "Nuovo endpoint GET /api/check-email?email=... registrato in routes/api.php, risponde JSON {\"exists\": bool}",
+        "L'endpoint è protetto da throttle middleware: 10 richieste al minuto per IP",
+        "Nel form, quando il focus lascia il campo email (evento blur), parte una fetch verso /api/check-email solo se il valore è una email valida (regex base)",
+        "Se exists=true, compare sotto il campo email il messaggio: 'Questo indirizzo email è già stato utilizzato per un\\'iscrizione.'",
+        "Se exists=false, il messaggio di errore scompare",
+        "Il submit del form è bloccato (button disabled o preventDefault) se l'errore di email duplicata è visibile",
         "Typecheck passes",
         "Verify in browser using dev-browser skill"
       ],
@@ -33,64 +36,102 @@
       "notes": ""
     },
     {
-      "id": "US-025",
-      "title": "Footer con contatti allineati all'header",
-      "description": "As a user, I want the footer to show the same phone and email as the header so that the contact information is consistent.",
+      "id": "US-033",
+      "title": "Export Excel /admin/registrations/export",
+      "description": "As an admin, I want to download a complete Excel export of registrations so I can analyze data offline.",
       "acceptanceCriteria": [
-        "In resources/views/layouts/app.blade.php il footer usa config('grmrl.support_phone') e config('grmrl.support_email') al posto dei valori hardcoded",
-        "I link href='tel:...' e href='mailto:...' nel footer usano gli stessi valori config dell'header",
-        "Nessun valore hardcoded di telefono o email rimane nel footer del layout",
-        "Typecheck passes",
-        "Verify in browser using dev-browser skill"
+        "GET /admin/registrations/export risponde con download di file .xlsx (non 404 né 500)",
+        "Il package maatwebsite/excel è installato via composer se non già presente",
+        "Il file scaricato si chiama 'iscrizioni-YYYY-MM-DD.xlsx' con la data odierna",
+        "Le colonne includono: Nome adulto, Cognome adulto, Email, Telefono, Data di nascita, Socio CAI, Sezione CAI, Attività, e per ogni minore (1-3): Nome, Cognome, Data di nascita",
+        "Il parametro opzionale ?activity_id=X filtra correttamente per attività",
+        "Se non ci sono registrazioni, il file contiene solo la riga di intestazione",
+        "Typecheck passes"
       ],
       "priority": 3,
       "passes": true,
       "notes": ""
     },
     {
-      "id": "US-026",
-      "title": "Errore visibile quando non è stato aggiunto nessun minore",
-      "description": "As a user who forgets to add a minor, I want to see a clear error message so that I understand what is missing.",
+      "id": "US-034",
+      "title": "Stampa PDF /admin/registrations/print",
+      "description": "As an admin, I want to generate a print-ready PDF of registrations so I can have a paper list at each excursion.",
       "acceptanceCriteria": [
-        "Aggiungere @error('minors') ... @enderror nella view registration/form.blade.php nella sezione 'Minori accompagnati'",
-        "Il messaggio 'È obbligatorio aggiungere almeno un minore.' è visibile in rosso quando il form è inviato senza minori",
-        "La sezione minori mostra uno stato visivo di errore (bordo o sfondo rosso) quando è presente l'errore",
-        "Typecheck passes",
-        "Verify in browser using dev-browser skill"
+        "GET /admin/registrations/print risponde con download di file PDF (non 404 né 500)",
+        "Il package barryvdh/laravel-dompdf è installato via composer se non già presente",
+        "Il file scaricato si chiama 'iscrizioni-YYYY-MM-DD.pdf' con la data odierna",
+        "Il PDF contiene una tabella con colonne: Nome, Cognome, Email, Telefono, Attività, Socio CAI (Sì/No), Sezione, Minori (lista nomi)",
+        "Intestazione del PDF: 'Iscrizioni – Giornata Regionale della Montagna' e data di generazione",
+        "Il parametro opzionale ?activity_id=X filtra per attività",
+        "La view blade per il PDF è creata in resources/views/admin/print.blade.php",
+        "Typecheck passes"
       ],
       "priority": 4,
       "passes": true,
       "notes": ""
     },
     {
-      "id": "US-027",
-      "title": "Validazione server-side sezione CAI per minori soci",
-      "description": "As a developer, I want the server to validate that a minor who is a CAI member has a section selected so that the data is consistent.",
+      "id": "US-029",
+      "title": "Persistenza sezione CAI adulto su errore form",
+      "description": "As a user, I want the CAI section I selected to remain visible after a failed form submission so I don't have to search and select it again.",
       "acceptanceCriteria": [
-        "In RegistrationController::store() aggiungere regola condizionale: minors.*.cai_section_id è obbligatorio quando minors.*.is_cai_member è truthy",
-        "La regola verifica anche l'esistenza dell'ID in cai_sections",
-        "Aggiungere messaggio di errore in italiano: 'La sezione CAI del minore è obbligatoria per i soci.'",
-        "Il form mostra gli errori per i campi minori (aggiungere gestione @error se assente)",
-        "Typecheck passes"
+        "Dopo un errore di validazione, il campo autocomplete sezione CAI adulto mostra il nome della sezione precedentemente selezionata",
+        "Il campo hidden cai_section_id ha il valore corretto (old('cai_section_id'))",
+        "Il controller (showForm o store con redirect back) passa alla view il nome della sezione pre-selezionata (da CaiSection::find(old('cai_section_id'))->name se esiste)",
+        "L'inizializzazione Alpine.js del componente sezione legge il valore pre-idratato dal controller",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
       ],
       "priority": 5,
       "passes": true,
       "notes": ""
     },
     {
-      "id": "US-028",
-      "title": "Pagina /conferma con riepilogo completo",
-      "description": "As a user who just registered, I want the confirmation page to show the full recap of my registration so that I can verify the data without opening the email.",
+      "id": "US-030",
+      "title": "Persistenza dati minori su errore form (inclusa sezione CAI)",
+      "description": "As a user, I want all the minor data I entered (including their CAI section) to remain after a failed form submission so I don't have to re-enter everything.",
       "acceptanceCriteria": [
-        "RegistrationController::store() salva l'ID iscrizione in sessione: session(['registration_id' => $registration->id])",
-        "RegistrationController::confirm() recupera il record Registration con le relazioni activity, minors, minors.caiSection, caiSection e lo passa alla view",
-        "Se registration_id non è in sessione, la view mostra solo il messaggio di successo generico senza recap",
-        "La view registration/confirm.blade.php mostra: nome e cognome adulto, sezione CAI o 'Non socio CAI', lista minori (nome, cognome, data di nascita, sezione CAI o non socio), box attività con nome/orario/luogo",
+        "Dopo un errore di validazione, tutti i minori precedentemente aggiunti vengono ripristinati nel form (nome, cognome, data di nascita, socio sì/no, codice fiscale)",
+        "L'array Alpine.js 'minors' viene inizializzato con JSON.parse del valore old('minors', []) passato dalla view",
+        "Per ogni minore che era socio CAI, la sezione selezionata torna visibile nell'autocomplete (nome + id pre-idratati)",
+        "Il controller (o redirect back) passa un array $preloadedMinorSections con le sezioni corrispondenti agli ID in old('minors')",
+        "I campi condizionali (sezione / codice fiscale) si mostrano/nascondono correttamente in base al flag is_cai_member ripristinato",
         "Typecheck passes",
         "Verify in browser using dev-browser skill"
       ],
       "priority": 6,
-      "passes": true,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-035",
+      "title": "Recap completo nella pagina /conferma",
+      "description": "As a user, I want the confirmation page to show all the data I entered so I can verify everything was recorded correctly.",
+      "acceptanceCriteria": [
+        "La sezione adulto mostra: Nome, Cognome, Data di nascita (gg/mm/aaaa), Email, Telefono, Socio CAI (Sì / No), Sezione CAI (se socio) oppure Codice Fiscale (se non socio)",
+        "Per ogni minore: Nome, Cognome, Data di nascita (gg/mm/aaaa), Socio CAI (Sì / No), Sezione CAI (se socio) oppure Codice Fiscale (se non socio)",
+        "Il controller confirm() carica $registration con le relazioni: activity, caiSection, minors, minors.caiSection",
+        "Se cai_section_id è null, mostra 'Non socio CAI' (non un campo vuoto)",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-036",
+      "title": "Recap completo nell'email di conferma",
+      "description": "As a user, I want the confirmation email to show all the data I entered so I have a complete record of my registration.",
+      "acceptanceCriteria": [
+        "La sezione adulto nell'email mostra: Nome, Cognome, Data di nascita (gg/mm/aaaa), Email, Telefono, Socio CAI (Sì / No), Sezione CAI (se socio) oppure Codice Fiscale (se non socio)",
+        "Per ogni minore nell'email: Nome, Cognome, Data di nascita (gg/mm/aaaa), Socio CAI (Sì / No), Sezione CAI (se socio) oppure Codice Fiscale (se non socio)",
+        "Il Mailable RegistrationConfirmation passa $registration con relazioni caiSection e minors.caiSection caricate",
+        "Il layout email rimane consistente con lo stile esistente (inline CSS, box per sezione)",
+        "Typecheck passes"
+      ],
+      "priority": 8,
+      "passes": false,
       "notes": ""
     }
   ]
