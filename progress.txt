@@ -1,3 +1,15 @@
+## 2026-06-25 - US-013
+- Created `app/Mail/RegistrationConfirmation.php` Mailable; constructor accepts Registration, auto-loads minors/activity/caiSection, encodes both logos as base64 strings
+- Created `resources/views/emails/registration-confirmation.blade.php` with inline base64 logos in header+footer, adult data, minors block, activity box, equipment reminder, support contacts from config('grmrl.*')
+- Updated `RegistrationController::store()`: added `Mail::to($registration->email)->send(new RegistrationConfirmation($registration))` after successful DB transaction
+- All 5 tests pass; no syntax errors in new files
+- **Learnings for future iterations:**
+  - `base64_encode(file_get_contents(public_path('images/file.png')))` to embed images inline in emails — avoids external URL dependency
+  - Mailable `content()` returns a `Content` view and all public properties are automatically passed to the Blade template
+  - `$registration->load(['minors', 'activity', 'caiSection'])` in constructor ensures eager-loaded relations available in the view
+  - Minor model already has `caiSection()` BelongsTo — no change needed
+---
+
 ## 2026-06-25 - US-012
 - Implemented `RegistrationController::store()` with full server-side validation: required fields, email format, `fiscal_code` size:16 when not CAI member, `cai_section_id` required when CAI member, `activity_id` exists, all 5 consent checkboxes required with `accepted` rule
 - `DB::transaction()` with `Activity::lockForUpdate()->findOrFail()`; if `isFull()` inside transaction, sets `$registration = null` and exits closure; after transaction, redirects back with `activity_id` error message

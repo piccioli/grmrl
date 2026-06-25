@@ -225,8 +225,8 @@
         "Typecheck passes"
       ],
       "priority": 13,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Mailable App\\Mail\\RegistrationConfirmation accepts a Registration (auto-loads minors, activity, caiSection). Constructor encodes cai-logo.png and ms-logo.png as base64 strings. Blade template emails/registration-confirmation.blade.php: header with inline base64 logos, body with adult data (name, CAI membership + section), minors block (name, DOB, CAI), activity box (name, meeting_time, meeting_place), equipment reminder list, support contacts from config('grmrl.*'). RegistrationController::store dispatches Mail::to()->send() after DB transaction succeeds. In-locale: email visible in MailPit on http://localhost:8025. All 5 tests pass."
     },
     {
       "id": "US-014",
