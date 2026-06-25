@@ -1,3 +1,12 @@
+## 2026-06-25 - US-026
+- Added `@error('minors') ... @enderror` block inside the "Minori accompagnati" card in `resources/views/registration/form.blade.php`
+- Message text: 'È obbligatorio aggiungere almeno un minore.' displayed as red text
+- Added `@error('minors') border border-red-400 bg-red-50 @enderror` to the card's class to show a red border+background visual error state
+- All 5 tests pass
+- **Learnings for future iterations:**
+  - `@error('fieldName')` in Blade classes works inside class attributes — generates no output when no error exists, outputs the class string when there's an error; safe to use inline in class=""
+---
+
 ## 2026-06-25 - US-025
 - Replaced hardcoded `gr_cai_lombardia@cai.it` and `+393274851177` in the footer of `resources/views/layouts/app.blade.php` with `config('grmrl.support_email')` and `config('grmrl.support_phone')`
 - Footer now uses the same config keys as the header support bar, ensuring consistency
