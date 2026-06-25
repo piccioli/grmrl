@@ -48,6 +48,16 @@ Started: Gio 25 Giu 2026 17:02:25 CEST
   - `->disabled()` on Filament TextInput shows value from record but prevents saving (dehydrated=false by default)
 ---
 
+## 2026-06-25 - US-041
+- Implemented: Added `DeleteAction` to the RegistrationResource table with custom confirmation modal; hard-deletes minors first then the adult registration
+- Files changed:
+  - `app/Filament/Resources/RegistrationResource.php` (added DeleteAction with requiresConfirmation, modalDescription with nome/cognome, custom action deleting minors then registration)
+- **Learnings for future iterations:**
+  - Filament v3 `Tables\Actions\DeleteAction::make()->requiresConfirmation()` shows a built-in modal; customize with `->modalHeading()`, `->modalDescription(fn($record) => ...)`, `->modalSubmitActionLabel()`
+  - Use `->action(fn(Registration $record) => ...)` to override default delete behavior (e.g., cascade delete children before parent)
+  - Filament table automatically re-renders after action completes — no manual refresh needed
+---
+
 ## 2026-06-25 - US-038
 - Implemented: Updated ActivitySeeder to geocode each activity's meeting place via Nominatim API; coordinates saved to latitude/longitude fields; warning logged if no results; 1-second pause between calls; found coordinates printed to console
 - Files changed:
