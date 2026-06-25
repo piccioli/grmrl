@@ -1,3 +1,15 @@
+## 2026-06-25 - US-005
+- Created `database/seeders/ActivitySeeder.php` with 5 activities matching PRD spec exactly
+- Created `database/seeders/AdminSeeder.php` using firstOrCreate with FILAMENT_ADMIN_EMAIL/PASSWORD from .env
+- Updated `database/seeders/DatabaseSeeder.php` to call CaiSectionSeeder, ActivitySeeder, AdminSeeder in order
+- Removed default Test User factory call from DatabaseSeeder
+- Verified: 5 activities inserted, admin user created, all 2 tests pass
+- **Learnings for future iterations:**
+  - Use `firstOrCreate` in AdminSeeder to avoid duplicate key errors on re-seed
+  - `env()` is accessible in seeders; prefer `env()` over `config()` for credentials not yet in a config file
+  - The DatabaseSeeder no longer has `WithoutModelEvents` trait — removed since we use model create() methods
+---
+
 ## 2026-06-25 - US-004
 - Installed `maatwebsite/excel ^3.1` (phpspreadsheet 1.30.5)
 - Created `database/seeders/CaiSectionSeeder.php` using PhpOffice\PhpSpreadsheet\IOFactory to read the xlsx directly (not via Maatwebsite facades, which conflict with tinker)

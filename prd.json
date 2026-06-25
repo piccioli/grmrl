@@ -83,8 +83,8 @@
         "Typecheck passes"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "ActivitySeeder crea 5 attività (rifugi) con dati esatti dal PRD. AdminSeeder usa firstOrCreate con FILAMENT_ADMIN_EMAIL/PASSWORD da .env. DatabaseSeeder chiama i 3 seeder nell'ordine corretto. Tutti i test passano."
     },
     {
       "id": "US-006",
