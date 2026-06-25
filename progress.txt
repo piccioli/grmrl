@@ -1,3 +1,14 @@
+## 2026-06-25 - US-006
+- Created `routes/api.php` with `GET /api/sections` route using `SectionController::class` (invokable)
+- Created `app/Http/Controllers/Api/SectionController.php` — returns [] for query < 2 chars, filters name OR code LIKE '%q%', limits to 15 results
+- Registered api routes in `bootstrap/app.php` via `withRouting(api: __DIR__.'/../routes/api.php')`
+- Verified live: Milano → 1 result, short query → [], broad query → 15 results (limit enforced)
+- **Learnings for future iterations:**
+  - Laravel 13 `withRouting()` accepts `api:` param directly — no separate `RouteServiceProvider` needed
+  - Invokable controllers (`__invoke`) keep simple API endpoints single-file clean
+  - The API prefix `/api/` is added automatically by `withRouting(api:)`
+---
+
 ## 2026-06-25 - US-005
 - Created `database/seeders/ActivitySeeder.php` with 5 activities matching PRD spec exactly
 - Created `database/seeders/AdminSeeder.php` using firstOrCreate with FILAMENT_ADMIN_EMAIL/PASSWORD from .env

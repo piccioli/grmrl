@@ -100,8 +100,8 @@
         "Typecheck passes"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "SectionController invokable in app/Http/Controllers/Api/. api.php route registered in bootstrap/app.php via withRouting(api:). Returns [] for < 2 chars, max 15 results, filters by name OR code LIKE. Tested live: GET /api/sections?q=Milano → 1 result; GET /api/sections?q=al → 15 results (limit enforced); GET /api/sections?q= → []."
     },
     {
       "id": "US-007",
