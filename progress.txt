@@ -1,3 +1,21 @@
+## 2026-06-25 - US-014
+- Created `app/Filament/Resources/RegistrationResource.php` with table (8 columns), 2 filters, ViewAction; infolist with 4 sections
+- Created `app/Filament/Resources/RegistrationResource/Pages/ListRegistrations.php`
+- Created `app/Filament/Resources/RegistrationResource/Pages/ViewRegistration.php`
+- Table columns: full_name (getStateUsing + searchable on first_name/last_name), email (searchable), phone, activity.name, minors_count (counts('minors')), created_at, is_cai_member (Sì/No), caiSection.name (default 'Non socio')
+- Filters: SelectFilter on activity_id, custom Filter with TextInput for nome/cognome/email (LIKE search)
+- Infolist: Dati adulto (2 col grid), Attività scelta (3 col), Minori (RepeatableEntry, hidden when empty), Consensi (2 col)
+- `getEloquentQuery()` eager-loads activity, caiSection, minors.caiSection
+- Routes verified via `php artisan route:list`: admin/registrations and admin/registrations/{record}
+- All 5 tests pass
+- **Learnings for future iterations:**
+  - `TextColumn::make()->counts('minors')` adds `withCount('minors')` automatically — column must be named `minors_count`
+  - `getStateUsing()` with `searchable(['col1','col2'])` allows computed display name but DB search on real columns
+  - `RepeatableEntry::make('minors')` in infolists iterates a HasMany relation — no extra config needed
+  - `->hidden(fn (ModelClass $record) => ...)` on a Section hides it dynamically based on record state
+  - AdminPanelProvider uses `discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')` — place resources there and they auto-register
+---
+
 ## 2026-06-25 - US-013
 - Created `app/Mail/RegistrationConfirmation.php` Mailable; constructor accepts Registration, auto-loads minors/activity/caiSection, encodes both logos as base64 strings
 - Created `resources/views/emails/registration-confirmation.blade.php` with inline base64 logos in header+footer, adult data, minors block, activity box, equipment reminder, support contacts from config('grmrl.*')

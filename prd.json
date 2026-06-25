@@ -242,8 +242,8 @@
         "Typecheck passes"
       ],
       "priority": 14,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "RegistrationResource created in app/Filament/Resources/ with table columns: full name (searchable on first_name+last_name), email (searchable), phone, activity.name, minors_count, created_at (d/m/Y H:i), is_cai_member (Sì/No), caiSection.name (default 'Non socio'). SelectFilter on activity_id, custom Filter with TextInput for nome/cognome/email search. ViewAction leads to ViewRegistration page with infolist: Dati adulto section (8 fields), Attività scelta section (3 fields), Minori repeatable section (hidden when empty), Consensi section (5 checkboxes). Routes: admin/registrations (list), admin/registrations/{record} (view). All 5 tests pass."
     },
     {
       "id": "US-015",
