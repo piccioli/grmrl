@@ -1,0 +1,33 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Exports\RegistrationsExport;
+use App\Http\Controllers\Controller;
+use App\Models\Activity;
+use App\Models\Registration;
+use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
+
+class ExportController extends Controller
+{
+    public function export(Request $request)
+    {
+        $activityId = $request->integer('activity_id') ?: null;
+
+        return Excel::download(new RegistrationsExport($activityId), 'iscrizioni.xlsx');
+    }
+
+    public function print(Request $request)
+    {
+        $activityId = $request->integer('activity_id') ?: null;
+        $activity = $activityId ? Activity::find($activityId) : null;
+
+        $registrations = Registration::with(['caiSection', 'minors'])
+            ->when($activityId, fn ($q) => $q->where('activity_id', $activityId))
+            ->orderBy('last_name')
+            ->get();
+
+        return view('admin.print', compact('activity', 'registrations'));
+    }
+}
