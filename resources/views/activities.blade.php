@@ -6,7 +6,7 @@
     <p class="text-gray-600">5 luglio 2026 – Giornata Regionale della Montagna, Regione Lombardia</p>
 </div>
 
-@if($activities->isEmpty())
+@if($activities->isEmpty() || $activities->every(fn($a) => $a['is_full']))
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
         <p class="text-gray-600 text-lg">Tutte le iniziative sono al completo.</p>
     </div>
