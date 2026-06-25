@@ -29,3 +29,13 @@ Started: 25 Giu 2026
   - Laravel `validate()` in un controller esegue automaticamente redirect back con withInput() e withErrors() in caso di fallimento — non serve gestire il redirect manualmente
   - Il messaggio custom per `unique` si aggiunge con chiave `campo.unique` nell'array messaggi di `validate()`
 ---
+
+## 2026-06-25 - US-030
+- `showForm()` ora calcola `$preloadedMinors`: legge `old('minors')`, raccoglie gli ID sezione dei minori soci, carica le sezioni CAI in un'unica query `whereIn`, poi costruisce un array PHP con tutti i campi Alpine (inclusi `sectionQuery`, `sectionResults: []`, `showDropdown: false`)
+- Nel blade, `minors: [],` sostituito con `minors: @json($preloadedMinors),` — Alpine viene inizializzato con i dati precedenti
+- Files changed: `app/Http/Controllers/RegistrationController.php`, `resources/views/registration/form.blade.php`
+- **Learnings for future iterations:**
+  - Per pre-popolare array Alpine da PHP, il modo più pulito è costruire l'intero oggetto array lato controller (inclusi campi Alpine come `sectionQuery`, `sectionResults`, `showDropdown`) e passarlo alla view come `$preloadedMinors`; poi nel blade basta `@json($preloadedMinors)` nell'inizializzazione `x-data`
+  - Alpine inizializza `is_cai_member` correttamente come booleano PHP `true`/`false` (non stringa) grazie al cast `! empty($minor['is_cai_member'])` nel controller
+  - Una singola `whereIn` evita N+1 query per recuperare i nomi delle sezioni dei minori
+---

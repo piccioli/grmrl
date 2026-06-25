@@ -29,7 +29,7 @@
         "Typecheck/lint passa"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
