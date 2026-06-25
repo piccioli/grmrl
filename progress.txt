@@ -1,3 +1,18 @@
+## 2026-06-25 - US-021
+- Created `app/Filament/Resources/ActivityResource.php` with List and Edit pages only (no Create/Delete)
+- Table columns: name (searchable/sortable), meeting_place, meeting_time, max_capacity, available_spots (getStateUsing → availableSpots()), is_active (IconColumn boolean)
+- Edit form: name (TextInput required), description (Textarea), meeting_time, meeting_place, max_capacity (numeric), is_active (Toggle)
+- Created `app/Filament/Resources/ActivityResource/Pages/ListActivities.php` — no header actions (no Create button)
+- Created `app/Filament/Resources/ActivityResource/Pages/EditActivity.php` — no header actions (no Delete button)
+- `/admin/activities` returns 302 → login (as expected for unauthenticated access)
+- All 5 tests pass
+- **Learnings for future iterations:**
+  - `IconColumn::make('is_active')->boolean()` shows green checkmark / red X — no need for ToggleColumn
+  - `getStateUsing(fn (Activity $record) => ...)` on a TextColumn works for computed columns from model methods
+  - Filament auto-discovers resources via `discoverResources()` in AdminPanelProvider — no manual registration needed
+  - Omit Create page from `getPages()` and leave `getHeaderActions()` empty on ListRecords to hide the Create button
+---
+
 ## 2026-06-25 - US-020
 - Updated `store()` in `RegistrationController`: changed `minors` from `['nullable','array','max:3']` to `['required','array','min:1','max:3']`
 - Added full Italian `messages` array as second argument to `$request->validate()` — covers all rules: required, email, date, size, accepted, exists, min
