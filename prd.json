@@ -188,8 +188,8 @@
         "Typecheck passes"
       ],
       "priority": 11,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "RegistrationController::showForm() queries active activities ordered by id, maps each to an array with available_spots and is_full computed via Activity::availableSpots()/isFull(). View renders 5 radio cards: bold name, description, meeting_time, meeting_place, spot count. Spot count is red 'Attività al completo' if full, orange 'Solo X posti disponibili' if <=5, green otherwise. Disabled card+radio when full. old('activity_id') pre-selects on validation error. Added RefreshDatabase to ExampleTest (DB query now hits activities table which didn't exist in in-memory SQLite without it). All 5 tests pass."
     },
     {
       "id": "US-012",

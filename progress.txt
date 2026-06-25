@@ -1,3 +1,15 @@
+## 2026-06-25 - US-011
+- Updated `RegistrationController::showForm()` to import and query `Activity::where('is_active', true)->orderBy('id')->get()`, mapping each to an array with id, name, description, meeting_time, meeting_place, available_spots, is_full
+- Added activity selection section to `resources/views/registration/form.blade.php` after the minors block (replaced placeholder comment): radio cards, one per activity, inside a white card
+- Each radio card: bold name, description, meeting_time, meeting_place, spot count (green/orange/red + disabled state when full)
+- Added `RefreshDatabase` trait to `tests/Feature/ExampleTest.php` — controller now queries the activities table, which didn't exist in the in-memory SQLite test DB without running migrations
+- `npm run build` succeeded; all 5 tests pass
+- **Learnings for future iterations:**
+  - When a controller starts querying the DB, feature tests using in-memory SQLite need `RefreshDatabase` — otherwise the tables don't exist and you get a 500
+  - `@php` blocks in Blade are fine for computing per-loop variables (e.g. `$spots`, `$isFull`) without polluting the controller
+  - Blade `old('activity_id') == $activity['id']` pre-selects the correct radio on validation error (comparing with == not === since old() returns string, array value is int)
+---
+
 ## 2026-06-25 - US-010
 - Added minors section to `resources/views/registration/form.blade.php` with Alpine.js x-data component
 - `addMinor()` pushes a new minor object onto `minors[]` array (disabled when length >= 3)
