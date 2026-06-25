@@ -1,3 +1,18 @@
+## 2026-06-25 - US-010
+- Added minors section to `resources/views/registration/form.blade.php` with Alpine.js x-data component
+- `addMinor()` pushes a new minor object onto `minors[]` array (disabled when length >= 3)
+- `removeMinor(index)` splices the minor out — re-enables button automatically via `:disabled` binding
+- Each minor object carries its own state: first_name, last_name, birth_date, is_cai_member, cai_section_id, fiscal_code + sectionQuery/sectionResults/showDropdown for autocomplete
+- `searchSections(index)` / `selectSection(index, section)` handle per-minor CAI section lookup (same /api/sections endpoint)
+- Field names use array syntax via `:name="'minors[' + index + '][field]'"` so they POST correctly
+- Checkbox `is_cai_member` shows CAI section autocomplete (if socio) or fiscal_code + insurance message (if non-socio) using `x-show` + `x-cloak`
+- `npm run build` succeeded; all 5 tests pass; `curl http://localhost/` → 200
+- **Learnings for future iterations:**
+  - Per-item state in an Alpine.js array: embed all reactive fields (including async state like sectionResults) directly in the pushed object — no separate x-data wrapper needed
+  - `:name` attribute with template literals (`'minors[' + index + '][field]'`) produces correct array-notation POST names
+  - `x-cloak` on conditional x-show blocks inside `<template x-for>` still works — Alpine processes them after DOM insertion
+---
+
 ## 2026-06-25 - US-009
 - Installed Alpine.js 3.15 via npm (`npm install alpinejs`)
 - Initialized Alpine in `resources/js/app.js` (`import Alpine; Alpine.start()`)

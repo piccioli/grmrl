@@ -171,8 +171,8 @@
         "Typecheck passes"
       ],
       "priority": 10,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Alpine.js x-data component for minors array. addMinor() pushes a new minor object (max 3, button disabled at cap); removeMinor(index) splices it out. Each minor has own state: first_name, last_name, birth_date, is_cai_member, cai_section_id, fiscal_code, sectionQuery, sectionResults, showDropdown. searchSections(index)/selectSection(index,section) handle per-minor autocomplete. Field names use array syntax: minors[N][field]. x-cloak hides conditional blocks (CAI section / fiscal_code). All 5 tests pass."
     },
     {
       "id": "US-011",
