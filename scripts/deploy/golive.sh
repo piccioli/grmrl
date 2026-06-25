@@ -58,7 +58,7 @@ run_remote "cd ${DEPLOY_PATH} && docker compose -f production.compose.yml exec -
 
 echo ""
 echo "==> Go-live completato!"
-echo "    Container attivi su 127.0.0.1:8080"
+echo "    Container attivi su 127.0.0.1:8083"
 echo ""
 echo "==> PASSI SUCCESSIVI:"
 echo "    1. Configura nginx host + SSL (vedi istruzioni in testa a questo script)"
