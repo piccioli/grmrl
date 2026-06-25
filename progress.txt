@@ -1,3 +1,18 @@
+## 2026-06-25 - US-028
+- Updated `RegistrationController::store()`: added `->with('registration_id', $registration->id)` to the redirect
+- Updated `RegistrationController::confirm()`: reads `registration_id` from session, loads Registration with `activity`, `minors`, `minors.caiSection`, `caiSection` relations via eager loading; passes `$registration` (or `null`) to the view
+- Rewrote `resources/views/registration/confirm.blade.php`:
+  - Always shows green success banner with email
+  - If `$registration` is set: shows adult data (name, surname, email, phone, CAI section or 'Non socio CAI'), activity box (name, meeting_time, meeting_place), minors list (name, surname, birth_date formatted d/m/Y, CAI section or 'Non socio CAI')
+  - If `$registration` is null (session expired/direct access): only the success banner shows
+- All 5 tests pass
+- **Learnings for future iterations:**
+  - `->with('registration_id', $registration->id)` on redirect puts the value in the flash session; `session('registration_id')` reads it on the next request
+  - Use `Registration::with(['activity', 'minors', 'minors.caiSection', 'caiSection'])->find($id)` — dot-notation for nested relations in a single with() call works perfectly
+  - `$minor->birth_date->format('d/m/Y')` — works because `birth_date` is cast to `date` in the Minor model (returns a Carbon instance)
+  - `$model->relation?->name ?? 'Non socio CAI'` — nullsafe operator handles both null relation and no-section cases cleanly
+---
+
 ## 2026-06-25 - US-027
 - Added `Rule::forEach()` validation rule for `minors.*.cai_section_id` in `RegistrationController::store()`: required when the sibling `is_cai_member` field is truthy, plus `exists:cai_sections,id`
 - Used `explode('.', $attribute)[1]` inside the forEach closure to extract the array index and look up `$data['minors'][$index]['is_cai_member']`
