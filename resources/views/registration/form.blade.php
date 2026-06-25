@@ -191,9 +191,186 @@
 
         </div>
 
-        {{-- Placeholder per US-010 (minori) e US-011 (attività) --}}
+    </div>{{-- end x-data adulto --}}
 
-    </div>{{-- end x-data --}}
+    {{-- Sezione minori --}}
+    <div
+        x-data="{
+            minors: [],
+            addMinor() {
+                if (this.minors.length >= 3) return;
+                this.minors.push({
+                    first_name: '',
+                    last_name: '',
+                    birth_date: '',
+                    is_cai_member: false,
+                    cai_section_id: '',
+                    fiscal_code: '',
+                    sectionQuery: '',
+                    sectionResults: [],
+                    showDropdown: false
+                });
+            },
+            removeMinor(index) {
+                this.minors.splice(index, 1);
+            },
+            async searchSections(index) {
+                const minor = this.minors[index];
+                if (minor.sectionQuery.length < 2) {
+                    minor.sectionResults = [];
+                    minor.showDropdown = false;
+                    return;
+                }
+                const res = await fetch('/api/sections?q=' + encodeURIComponent(minor.sectionQuery));
+                minor.sectionResults = await res.json();
+                minor.showDropdown = minor.sectionResults.length > 0;
+            },
+            selectSection(index, section) {
+                const minor = this.minors[index];
+                minor.cai_section_id = section.id;
+                minor.sectionQuery = section.name + (section.province ? ' (' + section.province + ')' : '');
+                minor.sectionResults = [];
+                minor.showDropdown = false;
+            }
+        }"
+        class="mt-6 space-y-4"
+    >
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-800">Minori accompagnati</h3>
+                <button
+                    type="button"
+                    @click="addMinor()"
+                    :disabled="minors.length >= 3"
+                    class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
+                    </svg>
+                    Aggiungi minore
+                </button>
+            </div>
+
+            <p x-show="minors.length === 0" class="text-sm text-gray-500 italic">Nessun minore aggiunto. Massimo 3 minori.</p>
+
+            <template x-for="(minor, index) in minors" :key="index">
+                <div class="border border-gray-200 rounded-lg p-4 space-y-4 mt-4">
+                    <div class="flex items-center justify-between">
+                        <h4 class="text-sm font-semibold text-gray-700" x-text="'Minore ' + (index + 1)"></h4>
+                        <button
+                            type="button"
+                            @click="removeMinor(index)"
+                            class="text-sm text-red-600 hover:text-red-800 font-medium"
+                        >Rimuovi</button>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nome <span class="text-red-500">*</span></label>
+                            <input
+                                type="text"
+                                :name="'minors[' + index + '][first_name]'"
+                                x-model="minor.first_name"
+                                required
+                                class="w-full rounded-lg border-gray-300 border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Cognome <span class="text-red-500">*</span></label>
+                            <input
+                                type="text"
+                                :name="'minors[' + index + '][last_name]'"
+                                x-model="minor.last_name"
+                                required
+                                class="w-full rounded-lg border-gray-300 border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Data di nascita <span class="text-red-500">*</span></label>
+                        <input
+                            type="date"
+                            :name="'minors[' + index + '][birth_date]'"
+                            x-model="minor.birth_date"
+                            required
+                            class="w-full rounded-lg border-gray-300 border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                    </div>
+
+                    <div class="pt-1">
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                :name="'minors[' + index + '][is_cai_member]'"
+                                value="1"
+                                x-model="minor.is_cai_member"
+                                class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            >
+                            <span class="text-sm font-medium text-gray-700">Il minore è socio CAI</span>
+                        </label>
+                    </div>
+
+                    {{-- Sezione CAI minore (se socio) --}}
+                    <div x-show="minor.is_cai_member" x-cloak>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Sezione CAI <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <input
+                                type="text"
+                                x-model="minor.sectionQuery"
+                                @input="searchSections(index)"
+                                @blur="setTimeout(() => minor.showDropdown = false, 150)"
+                                autocomplete="off"
+                                placeholder="Digita il nome della sezione..."
+                                :required="minor.is_cai_member"
+                                class="w-full rounded-lg border-gray-300 border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                            <input
+                                type="hidden"
+                                :name="'minors[' + index + '][cai_section_id]'"
+                                x-model="minor.cai_section_id"
+                            >
+                            <div
+                                x-show="minor.showDropdown"
+                                class="absolute z-10 w-full bg-white border border-gray-200 rounded-lg shadow-lg mt-1 max-h-56 overflow-y-auto"
+                            >
+                                <template x-for="section in minor.sectionResults" :key="section.id">
+                                    <button
+                                        type="button"
+                                        @click="selectSection(index, section)"
+                                        class="w-full text-left px-4 py-2 text-sm hover:bg-blue-50 border-b border-gray-100 last:border-0"
+                                    >
+                                        <span class="font-medium" x-text="section.name"></span>
+                                        <span class="text-gray-500 ml-1" x-show="section.province" x-text="'(' + section.province + ')'"></span>
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Codice fiscale minore (se non socio) --}}
+                    <div x-show="!minor.is_cai_member" x-cloak>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Codice Fiscale <span class="text-red-500">*</span></label>
+                        <input
+                            type="text"
+                            :name="'minors[' + index + '][fiscal_code]'"
+                            x-model="minor.fiscal_code"
+                            maxlength="16"
+                            pattern="[A-Za-z0-9]{16}"
+                            :required="!minor.is_cai_member"
+                            class="w-full rounded-lg border-gray-300 border px-3 py-2 text-sm font-mono uppercase focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                        <p class="mt-2 text-sm text-blue-700 bg-blue-50 rounded-lg px-3 py-2">
+                            In quanto non socio, il minore sarà assicurato con polizza Soccorso Alpino, RC e Infortuni Combinazione A a carico del GR Lombardia.
+                        </p>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        {{-- Placeholder per US-011 (attività) --}}
+
+    </div>{{-- end x-data minori --}}
 
 </form>
 @endsection
