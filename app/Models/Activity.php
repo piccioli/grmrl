@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Activity extends Model
 {
+    use HasFactory;
     protected $fillable = ['name', 'description', 'meeting_time', 'meeting_place', 'max_capacity', 'is_active'];
 
     protected $casts = [
