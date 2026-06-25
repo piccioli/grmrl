@@ -1,3 +1,19 @@
+## 2026-06-25 - US-008
+- Created `config/grmrl.php` reading GRMRL_PHONE/EMAIL/SUPPORT_HOURS from .env
+- Copied logos to `public/images/cai-logo.png` and `public/images/ms-logo.png`
+- Created `resources/views/layouts/app.blade.php` with header (CAI logo + title + support info bar), @yield('content'), and footer (MS logo + CAI Lombardia address/email/phone)
+- Created `app/Http/Controllers/RegistrationController.php` with `showForm()` method
+- Created `resources/views/registration/form.blade.php` extending the layout
+- Updated `routes/web.php`: GET / → RegistrationController::showForm
+- Ran `npm install && npm run build` (Tailwind 4 + Vite 8) — succeeded, assets in public/build/ (gitignored)
+- Verified: `curl http://localhost/` → HTTP 200, all expected content present
+- All 5 existing tests still pass
+- **Learnings for future iterations:**
+  - `public/build` is gitignored — run `npm run build` on the host (node is available) before testing the UI
+  - Tailwind 4 uses `@import 'tailwindcss'` syntax in app.css — no separate tailwind.config.js needed
+  - config/grmrl.php provides `config('grmrl.phone')` etc. in Blade views
+---
+
 ## 2026-06-25 - US-007
 - Added `HasFactory` trait to Activity, Registration, Minor models
 - Created `database/factories/ActivityFactory.php`, `RegistrationFactory.php`, `MinorFactory.php`

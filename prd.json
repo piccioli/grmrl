@@ -136,8 +136,8 @@
         "Typecheck passes"
       ],
       "priority": 8,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "config/grmrl.php reads GRMRL_PHONE/EMAIL/SUPPORT_HOURS from .env. Logos copied to public/images/. Blade layout resources/views/layouts/app.blade.php with header (CAI logo + title), support bar (phone/hours/email from config), main slot, footer (MS logo + CAI Lombardia contacts). RegistrationController::showForm returns registration.form view. npm run build succeeded with Tailwind 4 + Vite 8. All 5 tests pass. GET / → HTTP 200."
     },
     {
       "id": "US-009",
