@@ -1,0 +1,17 @@
+## Codebase Patterns
+- Tests must run inside Docker: `docker compose exec app php artisan test` (DB is only available inside the container)
+- Config keys in `config/grmrl.php` map from `.env` vars; always add corresponding `.env.example` entries when adding new config keys
+- Layout at `resources/views/layouts/app.blade.php` uses `config('grmrl.*')` for dynamic values in header
+- `config('grmrl.support_phone')` e `config('grmrl.support_email')` sono i contatti di supporto usati in header e footer; `config('grmrl.phone')` e `config('grmrl.email')` sono i contatti CAI usati nelle email transazionali
+
+# Ralph Progress Log
+Started: 25 Giu 2026
+---
+
+## 2026-06-25 - US-023
+- Sostituita l'occorrenza di 'Club Alpino Italiano – Sezione Lombardia' con 'Club Alpino Italiano – Gruppo Regionale Lombardia' in resources/views/landing.blade.php
+- Files changed: resources/views/landing.blade.php
+- **Learnings for future iterations:**
+  - L'unica occorrenza del nome vecchio era in landing.blade.php riga 19
+  - Grep con `--exclude-dir=vendor --exclude-dir=storage` è sufficiente per cercare nel codebase applicativo
+---

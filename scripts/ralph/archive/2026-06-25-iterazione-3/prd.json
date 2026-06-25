@@ -1,0 +1,97 @@
+{
+  "project": "GRMRL",
+  "branchName": "ralph/iterazione-3",
+  "description": "Terza iterazione: correzione denominazione organizzazione, bottone INIZIA, footer contatti allineati, errore minori obbligatori, validazione sezione CAI per minori soci, pagina /conferma con riepilogo completo.",
+  "userStories": [
+    {
+      "id": "US-023",
+      "title": "Correzione denominazione organizzazione",
+      "description": "As a developer, I want to fix the organization name so that the correct official name is used consistently.",
+      "acceptanceCriteria": [
+        "Sostituire ogni occorrenza di 'Club Alpino Italiano – Sezione Lombardia' con 'Club Alpino Italiano – Gruppo Regionale Lombardia' in tutti i file blade e PHP (escluso vendor e storage)",
+        "Nessuna occorrenza del testo vecchio rimane nel codebase (verificabile con grep)",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-024",
+      "title": "Bottone INIZIA maiuscolo con padding corretto",
+      "description": "As a visitor, I want the CTA button on the landing page to be clearly styled and readable so that it attracts attention.",
+      "acceptanceCriteria": [
+        "Il testo nel template HTML è 'INIZIA' (tutto maiuscolo, non via classe CSS uppercase su testo minuscolo)",
+        "Il padding è visivamente equilibrato (es. px-12 py-4 o equivalente)",
+        "Il bottone ha dimensione e aspetto da CTA principale chiaramente cliccabile",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-025",
+      "title": "Footer con contatti allineati all'header",
+      "description": "As a user, I want the footer to show the same phone and email as the header so that the contact information is consistent.",
+      "acceptanceCriteria": [
+        "In resources/views/layouts/app.blade.php il footer usa config('grmrl.support_phone') e config('grmrl.support_email') al posto dei valori hardcoded",
+        "I link href='tel:...' e href='mailto:...' nel footer usano gli stessi valori config dell'header",
+        "Nessun valore hardcoded di telefono o email rimane nel footer del layout",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-026",
+      "title": "Errore visibile quando non è stato aggiunto nessun minore",
+      "description": "As a user who forgets to add a minor, I want to see a clear error message so that I understand what is missing.",
+      "acceptanceCriteria": [
+        "Aggiungere @error('minors') ... @enderror nella view registration/form.blade.php nella sezione 'Minori accompagnati'",
+        "Il messaggio 'È obbligatorio aggiungere almeno un minore.' è visibile in rosso quando il form è inviato senza minori",
+        "La sezione minori mostra uno stato visivo di errore (bordo o sfondo rosso) quando è presente l'errore",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-027",
+      "title": "Validazione server-side sezione CAI per minori soci",
+      "description": "As a developer, I want the server to validate that a minor who is a CAI member has a section selected so that the data is consistent.",
+      "acceptanceCriteria": [
+        "In RegistrationController::store() aggiungere regola condizionale: minors.*.cai_section_id è obbligatorio quando minors.*.is_cai_member è truthy",
+        "La regola verifica anche l'esistenza dell'ID in cai_sections",
+        "Aggiungere messaggio di errore in italiano: 'La sezione CAI del minore è obbligatoria per i soci.'",
+        "Il form mostra gli errori per i campi minori (aggiungere gestione @error se assente)",
+        "Typecheck passes"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-028",
+      "title": "Pagina /conferma con riepilogo completo",
+      "description": "As a user who just registered, I want the confirmation page to show the full recap of my registration so that I can verify the data without opening the email.",
+      "acceptanceCriteria": [
+        "RegistrationController::store() salva l'ID iscrizione in sessione: session(['registration_id' => $registration->id])",
+        "RegistrationController::confirm() recupera il record Registration con le relazioni activity, minors, minors.caiSection, caiSection e lo passa alla view",
+        "Se registration_id non è in sessione, la view mostra solo il messaggio di successo generico senza recap",
+        "La view registration/confirm.blade.php mostra: nome e cognome adulto, sezione CAI o 'Non socio CAI', lista minori (nome, cognome, data di nascita, sezione CAI o non socio), box attività con nome/orario/luogo",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": ""
+    }
+  ]
+}
