@@ -39,3 +39,23 @@ Started: 25 Giu 2026
   - Alpine inizializza `is_cai_member` correttamente come booleano PHP `true`/`false` (non stringa) grazie al cast `! empty($minor['is_cai_member'])` nel controller
   - Una singola `whereIn` evita N+1 query per recuperare i nomi delle sezioni dei minori
 ---
+
+## 2026-06-25 - US-035
+- Aggiunta `data di nascita` dell'adulto nella sezione dati personali
+- Aggiunto campo `Socio CAI` (Sì/No) con display condizionale: se socio mostra sezione CAI, se non socio mostra codice fiscale
+- Stessa logica condizionale applicata ai minori: `is_cai_member` → sezione CAI o codice fiscale
+- Files changed: `resources/views/registration/confirm.blade.php`
+- **Learnings for future iterations:**
+  - Il controller `confirm()` carica già tutte le relazioni necessarie (`activity`, `minors`, `minors.caiSection`, `caiSection`) — nessuna modifica necessaria al controller
+  - I cast `birth_date` e `is_cai_member` su Registration e Minor sono già configurati nei modelli — `->format('d/m/Y')` e confronto booleano funzionano direttamente
+---
+
+## 2026-06-25 - US-036
+- Aggiunta `data di nascita`, `email`, `telefono` dell'adulto nell'email
+- Aggiunto `codice fiscale` dell'adulto quando non è socio CAI
+- Aggiunto `codice fiscale` dei minori quando non sono soci CAI
+- Corretto il `load()` nel Mailable da `['minors', ...]` a `['minors.caiSection', ...]` per eager loading delle sezioni dei minori
+- Files changed: `app/Mail/RegistrationConfirmation.php`, `resources/views/emails/registration-confirmation.blade.php`
+- **Learnings for future iterations:**
+  - Il Mailable carica le relazioni nel costruttore — verificare sempre che tutte le relazioni siano incluse (in particolare le nested relations come `minors.caiSection`)
+---
