@@ -3,15 +3,19 @@
 - Config keys in `config/grmrl.php` map from `.env` vars; always add corresponding `.env.example` entries when adding new config keys
 - Layout at `resources/views/layouts/app.blade.php` uses `config('grmrl.*')` for dynamic values in header
 - `config('grmrl.support_phone')` e `config('grmrl.support_email')` sono i contatti di supporto usati in header e footer; `config('grmrl.phone')` e `config('grmrl.email')` sono i contatti CAI usati nelle email transazionali
+- Il form di registrazione usa Alpine.js per la gestione dinamica dei minori (array) e per l'autocomplete delle sezioni CAI; i dati Alpine vanno inizializzati con `old()` passato come JSON per preservarli dopo errori di validazione
+- L'endpoint `/api/sections?q=...` restituisce le sezioni CAI per l'autocomplete; il rate limiting è configurato in RouteServiceProvider
 
 # Ralph Progress Log
 Started: 25 Giu 2026
 ---
 
-## 2026-06-25 - US-023
-- Sostituita l'occorrenza di 'Club Alpino Italiano – Sezione Lombardia' con 'Club Alpino Italiano – Gruppo Regionale Lombardia' in resources/views/landing.blade.php
-- Files changed: resources/views/landing.blade.php
+## 2026-06-25 - US-032
+- Aggiunta regola `unique:registrations,email` alla validazione del campo email in `RegistrationController::store()`
+- Aggiunto messaggio d'errore in italiano: "Questo indirizzo email è già stato utilizzato per un'iscrizione. Ogni partecipante deve usare un'email univoca."
+- Laravel `validate()` gestisce automaticamente il redirect back con `withInput()` in caso di errore
+- Files changed: `app/Http/Controllers/RegistrationController.php`
 - **Learnings for future iterations:**
-  - L'unica occorrenza del nome vecchio era in landing.blade.php riga 19
-  - Grep con `--exclude-dir=vendor --exclude-dir=storage` è sufficiente per cercare nel codebase applicativo
+  - Laravel `validate()` in un controller esegue automaticamente redirect back con withInput() e withErrors() in caso di fallimento — non serve gestire il redirect manualmente
+  - Il messaggio custom per `unique` si aggiunge con chiave `campo.unique` nell'array messaggi di `validate()`
 ---
