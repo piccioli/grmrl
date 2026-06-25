@@ -81,6 +81,15 @@ class RegistrationResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
+                Tables\Actions\DeleteAction::make()
+                    ->requiresConfirmation()
+                    ->modalHeading('Elimina iscrizione')
+                    ->modalDescription(fn (Registration $record): string => 'Sei sicuro di voler eliminare l\'iscrizione di '.$record->first_name.' '.$record->last_name.'? L\'operazione non è reversibile.')
+                    ->modalSubmitActionLabel('Sì, elimina')
+                    ->action(function (Registration $record): void {
+                        $record->minors()->delete();
+                        $record->delete();
+                    }),
             ])
             ->defaultSort('created_at', 'desc');
     }
