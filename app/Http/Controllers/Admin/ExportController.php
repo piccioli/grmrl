@@ -16,7 +16,7 @@ class ExportController extends Controller
     {
         $activityId = $request->integer('activity_id') ?: null;
 
-        $filename = 'iscrizioni-' . now()->format('Y-m-d') . '.xlsx';
+        $filename = 'iscrizioni-'.now()->format('Y-m-d').'.xlsx';
 
         return Excel::download(new RegistrationsExport($activityId), $filename);
     }
@@ -32,7 +32,7 @@ class ExportController extends Controller
             ->get();
 
         $generatedAt = now()->format('d/m/Y');
-        $filename = 'iscrizioni-' . now()->format('Y-m-d') . '.pdf';
+        $filename = 'iscrizioni-'.now()->format('Y-m-d').'.pdf';
 
         $pdf = Pdf::loadView('admin.print', compact('activity', 'registrations', 'generatedAt'));
 

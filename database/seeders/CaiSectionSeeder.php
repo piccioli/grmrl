@@ -20,17 +20,17 @@ class CaiSectionSeeder extends Seeder
         $batch = [];
 
         for ($i = 2; $i <= $highestRow; $i++) {
-            $code = $sheet->getCell('A' . $i)->getValue();
+            $code = $sheet->getCell('A'.$i)->getValue();
 
             if (empty($code)) {
                 continue;
             }
 
             $batch[] = [
-                'code'     => (string) $code,
-                'name'     => (string) $sheet->getCell('B' . $i)->getValue(),
-                'region'   => $sheet->getCell('C' . $i)->getValue() ?: null,
-                'province' => $sheet->getCell('D' . $i)->getValue() ?: null,
+                'code' => (string) $code,
+                'name' => (string) $sheet->getCell('B'.$i)->getValue(),
+                'region' => $sheet->getCell('C'.$i)->getValue() ?: null,
+                'province' => $sheet->getCell('D'.$i)->getValue() ?: null,
             ];
 
             if (count($batch) >= 100) {
@@ -39,7 +39,7 @@ class CaiSectionSeeder extends Seeder
             }
         }
 
-        if (!empty($batch)) {
+        if (! empty($batch)) {
             CaiSection::insert($batch);
         }
     }

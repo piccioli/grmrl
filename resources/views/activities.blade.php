@@ -22,7 +22,14 @@
                     <div class="flex-1">
                         <h3 class="text-lg font-bold text-gray-900 mb-1">{{ $activity['name'] }}</h3>
                         <p class="text-sm text-gray-600 mb-1">
-                            <span class="font-medium">Luogo:</span> {{ $activity['meeting_place'] }}
+                            <span class="font-medium">Luogo:</span>
+                            @if($activity['latitude'] !== null && $activity['longitude'] !== null)
+                                <a href="https://www.google.com/maps?q={{ $activity['latitude'] }},{{ $activity['longitude'] }}"
+                                   target="_blank" rel="noopener noreferrer"
+                                   class="text-blue-700 hover:underline">{{ $activity['meeting_place'] }}</a>
+                            @else
+                                {{ $activity['meeting_place'] }}
+                            @endif
                             &nbsp;|&nbsp;
                             <span class="font-medium">Orario:</span> {{ $activity['meeting_time'] }}
                         </p>

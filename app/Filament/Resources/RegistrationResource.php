@@ -3,6 +3,8 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\RegistrationResource\Pages;
+use App\Mail\RegistrationCancellation;
+use App\Mail\RegistrationConfirmation;
 use App\Models\Activity;
 use App\Models\Registration;
 use Filament\Forms\Components\TextInput;
@@ -17,6 +19,7 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Mail;
 
 class RegistrationResource extends Resource
 {
@@ -81,6 +84,29 @@ class RegistrationResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
+                Tables\Actions\Action::make('resend_confirmation')
+                    ->label('Email')
+                    ->icon('heroicon-o-envelope')
+                    ->color('info')
+                    ->requiresConfirmation()
+                    ->modalHeading('Invia email di conferma')
+                    ->modalDescription(fn (Registration $record): string => 'Vuoi inviare di nuovo l\'email di conferma a '.$record->email.'?')
+                    ->modalSubmitActionLabel('Sì, invia')
+                    ->action(function (Registration $record): void {
+                        Mail::to($record->email)->send(new RegistrationConfirmation($record));
+                    })
+                    ->successNotificationTitle('Email inviata'),
+                Tables\Actions\DeleteAction::make()
+                    ->requiresConfirmation()
+                    ->modalHeading('Elimina iscrizione')
+                    ->modalDescription(fn (Registration $record): string => 'Sei sicuro di voler eliminare l\'iscrizione di '.$record->first_name.' '.$record->last_name.'? L\'operazione non è reversibile.')
+                    ->modalSubmitActionLabel('Sì, elimina')
+                    ->action(function (Registration $record): void {
+                        $mailable = new RegistrationCancellation($record);
+                        $record->minors()->delete();
+                        $record->delete();
+                        Mail::to($mailable->registration->email)->send($mailable);
+                    }),
             ])
             ->defaultSort('created_at', 'desc');
     }

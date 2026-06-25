@@ -10,11 +10,17 @@
 
     <header class="bg-white shadow-sm">
         <div class="max-w-2xl mx-auto px-4 py-4 flex items-center gap-4">
-            <img src="{{ asset('images/cai-logo.png') }}" alt="CAI Logo" class="h-16 w-auto">
-            <div>
+            <div class="flex flex-col items-center gap-1">
+                <img src="{{ asset('images/cai-logo.png') }}" alt="CAI Logo" class="h-14 w-auto">
+                <span class="text-xs text-gray-600 font-medium whitespace-nowrap">Gruppo Regionale Lombardia</span>
+            </div>
+            <div class="flex-1">
                 <h1 class="text-lg font-semibold text-gray-900 leading-tight">
                     Giornata Regionale della Montagna – Regione Lombardia | GRMRL
                 </h1>
+            </div>
+            <div class="bg-white rounded-lg p-2 border border-gray-200 shadow-sm">
+                <img src="{{ asset('images/rl-logo.png') }}" alt="Regione Lombardia – Il Consiglio" class="h-12 w-auto">
             </div>
         </div>
 
