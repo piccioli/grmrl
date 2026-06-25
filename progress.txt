@@ -1,3 +1,19 @@
+## 2026-06-25 - US-012
+- Implemented `RegistrationController::store()` with full server-side validation: required fields, email format, `fiscal_code` size:16 when not CAI member, `cai_section_id` required when CAI member, `activity_id` exists, all 5 consent checkboxes required with `accepted` rule
+- `DB::transaction()` with `Activity::lockForUpdate()->findOrFail()`; if `isFull()` inside transaction, sets `$registration = null` and exits closure; after transaction, redirects back with `activity_id` error message
+- On success: creates `Registration` + loops over `minors` to create `Minor` records; redirects to `/conferma` with `email` in session flash
+- Added 5 consent checkboxes to `resources/views/registration/form.blade.php`: privacy_accepted, photo_release_accepted, rules_accepted, weather_cancellation_accepted, equipment_check_accepted — each with `@error` display and `old()` pre-check
+- Added 'Invia iscrizione' submit button at the end of the form
+- Confirmation view at `resources/views/registration/confirm.blade.php` was already correct from US-009 stub
+- All 5 tests pass; `npm run build` succeeds
+- **Learnings for future iterations:**
+  - `Rule::requiredIf($bool)` for conditional required fields (CAI section vs fiscal code) — needs `use Illuminate\Validation\Rule;`
+  - Checkbox value `"1"` passes Laravel's `accepted` rule; absent checkbox (unchecked) fails it — correct behavior for mandatory consents
+  - Pattern `$registration = null; DB::transaction(fn() => ... $registration = $reg)` — if closure returns early (activity full), `$registration` stays null; check after the call to branch output
+  - `lockForUpdate()` in SQLite (test DB) is a no-op — tests pass without issue
+  - `$request->input('field') ?: null` normalizes empty strings to null for nullable FK fields
+---
+
 ## 2026-06-25 - US-011
 - Updated `RegistrationController::showForm()` to import and query `Activity::where('is_active', true)->orderBy('id')->get()`, mapping each to an array with id, name, description, meeting_time, meeting_place, available_spots, is_full
 - Added activity selection section to `resources/views/registration/form.blade.php` after the minors block (replaced placeholder comment): radio cards, one per activity, inside a white card

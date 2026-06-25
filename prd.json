@@ -208,8 +208,8 @@
         "Typecheck passes"
       ],
       "priority": 12,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Implemented store() in RegistrationController with full server-side validation (required, email, fiscal_code size:16, activity_id exists, all checkboxes accepted). DB::transaction with Activity::lockForUpdate() + isFull() check — redirects back with activity_id error if full. Creates Registration + Minors on success, redirects to /conferma with email in session flash. Added 5 consent checkboxes (privacy, photo_release, rules, weather_cancellation, equipment_check) and submit button 'Invia iscrizione' to form. Confirmation view already correct from US-009 stub. All 5 tests pass."
     },
     {
       "id": "US-013",
