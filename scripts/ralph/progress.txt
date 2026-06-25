@@ -68,3 +68,15 @@ Started: Gio 25 Giu 2026 17:02:25 CEST
   - Pint's `concat_space` rule: string concatenation must have spaces around `.` (e.g., `$place.' Italia'`)
   - Geocoding runs at seeding time — seeded DB will have real coordinates from Nominatim
 ---
+
+## 2026-06-25 - US-042
+- Implemented: New RegistrationCancellation Mailable and email view; email sent synchronously in the DeleteAction after hard-deleting the registration
+- Files changed:
+  - `app/Mail/RegistrationCancellation.php` (new — mirrors RegistrationConfirmation pattern, loads activity and caiSection)
+  - `resources/views/emails/registration-cancellation.blade.php` (new — same layout as confirmation email with cancellation messaging and re-register invite)
+  - `app/Filament/Resources/RegistrationResource.php` (updated DeleteAction to construct mailable before deletion, send after)
+- **Learnings for future iterations:**
+  - Mailable must be constructed BEFORE record.delete() so relations are still loaded in memory; synchronous Mail::send does not re-fetch from DB (no serialization)
+  - Access `$mailable->registration->email` after deletion works because the PHP object is still in memory with all eager-loaded relations
+  - Use `Mail::to($email)->send($mailable)` for synchronous (no-queue) sending; Mailpit captures it locally at localhost:8025
+---
