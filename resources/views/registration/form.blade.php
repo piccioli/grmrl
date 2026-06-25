@@ -12,7 +12,7 @@
     novalidate
     x-data="{
         isCaiMember: {{ old('is_cai_member') ? 'true' : 'false' }},
-        sectionQuery: @json($preloadedSectionName),
+        sectionQuery: {{ Js::from($preloadedSectionName) }},
         sectionResults: [],
         selectedSectionId: '{{ old('cai_section_id', '') }}',
         showDropdown: false,
@@ -52,8 +52,7 @@
     @csrf
 
     {{-- Dati adulto --}}
-    <div class="space-y-6">
-        <div class="bg-white rounded-xl shadow-sm p-6 space-y-4">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
             <h3 class="text-lg font-semibold text-gray-800 border-b pb-2">Dati personali</h3>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -208,14 +207,12 @@
                 </p>
             </div>
 
-        </div>
-
-    </div>{{-- end x-data adulto --}}
+    </div>
 
     {{-- Sezione minori --}}
     <div
         x-data="{
-            minors: @json($preloadedMinors),
+            minors: {{ Js::from($preloadedMinors) }},
             addMinor() {
                 if (this.minors.length >= 3) return;
                 this.minors.push({
@@ -254,7 +251,7 @@
         }"
         class="mt-6 space-y-4"
     >
-        <div class="bg-white rounded-xl shadow-sm p-6 @error('minors') border border-red-400 bg-red-50 @enderror">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 @error('minors') border-red-400 bg-red-50 @enderror">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-semibold text-gray-800">Minori accompagnati</h3>
                 <button
@@ -407,7 +404,7 @@
     </div>{{-- end x-data minori --}}
 
     {{-- Attività selezionata --}}
-    <div class="mt-6 bg-white rounded-xl shadow-sm p-6">
+    <div class="mt-6 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <h3 class="text-lg font-semibold text-gray-800 border-b pb-2 mb-4">Attività selezionata</h3>
 
         @error('activity')
@@ -430,7 +427,7 @@
     </div>
 
     {{-- Consensi obbligatori --}}
-    <div class="mt-6 bg-white rounded-xl shadow-sm p-6 space-y-4">
+    <div class="mt-6 bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
         <h3 class="text-lg font-semibold text-gray-800 border-b pb-2">Consensi obbligatori</h3>
 
         {{-- 1. Privacy --}}

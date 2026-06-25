@@ -16,7 +16,7 @@ class ListRegistrations extends ListRecords
             Action::make('export')
                 ->label('Esporta Excel')
                 ->icon('heroicon-o-arrow-down-tray')
-                ->url(fn (): string => route('admin.export', array_filter([
+                ->url(fn (): string => route('filament.admin.admin.export', array_filter([
                     'activity_id' => $this->tableFilters['activity_id']['value'] ?? null,
                 ])))
                 ->openUrlInNewTab(),
@@ -24,7 +24,7 @@ class ListRegistrations extends ListRecords
                 ->label('Vista stampabile')
                 ->icon('heroicon-o-printer')
                 ->color('gray')
-                ->url(fn (): string => route('admin.print', array_filter([
+                ->url(fn (): string => route('filament.admin.admin.print', array_filter([
                     'activity_id' => $this->tableFilters['activity_id']['value'] ?? null,
                 ])))
                 ->openUrlInNewTab(),
