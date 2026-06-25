@@ -1,3 +1,11 @@
+## 2026-06-25 - US-018
+- activities.blade.php was already fully implemented in US-017 (cards with bold name, meeting_place, meeting_time, description, availableSpots(), disabled state for full cards)
+- Fixed empty-state condition: was `$activities->isEmpty()`, now `$activities->isEmpty() || $activities->every(fn($a) => $a['is_full'])` — shows "Tutte le iniziative sono al completo" when all active activities are exhausted, not just when none exist
+- All 5 tests pass
+- **Learnings for future iterations:**
+  - The `$activities->every(fn($a) => $a['is_full'])` Blade lambda works on a Laravel Collection of arrays (not models) — the arrow function receives the array element directly
+---
+
 ## 2026-06-25 - US-017
 - Created `resources/views/landing.blade.php` extending layouts.app: title 'Respira la Montagna', event date/location (5 luglio 2026, Regione Lombardia), descriptive text, 'Inizia' button → route('activities')
 - Created `resources/views/activities.blade.php` extending layouts.app: activity cards with available spots, disabled state for full activities (stub filled with full implementation for US-018)
