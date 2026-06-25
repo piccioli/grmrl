@@ -1,0 +1,267 @@
+{
+  "project": "GRMRL",
+  "branchName": "ralph/grmrl-iscrizioni",
+  "description": "Sistema di iscrizione online per la Giornata Regionale Montagne Regione Lombardia – Respira la Montagna (5 luglio 2026). Form pubblico per adulti + minori, gestione capienza per attività con 50 posti, email di conferma, pannello admin Filament con export Excel.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Setup Docker + Laravel",
+      "description": "As a developer, I want a Dockerized Laravel environment so I can develop locally and deploy to production.",
+      "acceptanceCriteria": [
+        "docker-compose.yml con servizi: app (PHP 8.3-fpm), db (MySQL 8), mailpit, nginx",
+        "Dockerfile per il servizio app basato su php:8.3-fpm",
+        "nginx.conf che serve l'app Laravel su porta 80",
+        "Progetto Laravel 11 creato nella root (composer create-project laravel/laravel .)",
+        "Connessione MySQL configurata in .env: DB_HOST=db, DB_DATABASE=grmrl, DB_USERNAME=grmrl, DB_PASSWORD=secret",
+        "php artisan migrate eseguito senza errori (solo migrations default di Laravel)",
+        "curl http://localhost risponde con HTTP 200",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "title": "Installazione Filament + .env.example + README",
+      "description": "As a developer, I want Filament installed and a documented .env.example so the admin panel is ready and setup is reproducible.",
+      "acceptanceCriteria": [
+        "composer require filament/filament:'^3.2' installato senza errori",
+        "php artisan filament:install --panels eseguito, pannello configurato su /admin",
+        "http://localhost/admin risponde con HTTP 200 (pagina login Filament)",
+        ".env.example presente con le variabili: GRMRL_PHONE, GRMRL_EMAIL, GRMRL_SUPPORT_HOURS, FILAMENT_ADMIN_EMAIL, FILAMENT_ADMIN_PASSWORD, MAIL_MAILER, MAIL_HOST, MAIL_PORT, MAIL_USERNAME, MAIL_PASSWORD, MAIL_FROM_ADDRESS",
+        "README.md con istruzioni: cp .env.example .env, docker-compose up -d, php artisan migrate --seed",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "title": "Migrations: cai_sections, activities, registrations, minors",
+      "description": "As a developer, I want all database tables created via migrations so the schema is version-controlled.",
+      "acceptanceCriteria": [
+        "Migration create_cai_sections_table: id, code (string), name (string), region (string nullable), province (string nullable), timestamps",
+        "Migration create_activities_table: id, name (string), description (text), meeting_time (string), meeting_place (string), max_capacity (unsignedInteger default 50), is_active (boolean default true), timestamps",
+        "Migration create_registrations_table: id, first_name (string), last_name (string), email (string), phone (string), birth_date (date), is_cai_member (boolean default false), cai_section_id (FK cai_sections nullable), fiscal_code (string nullable), activity_id (FK activities), privacy_accepted (boolean), photo_release_accepted (boolean), rules_accepted (boolean), weather_cancellation_accepted (boolean), equipment_check_accepted (boolean), timestamps",
+        "Migration create_minors_table: id, registration_id (FK registrations cascade delete), first_name (string), last_name (string), birth_date (date), is_cai_member (boolean default false), cai_section_id (FK cai_sections nullable), fiscal_code (string nullable), timestamps",
+        "Modelli Eloquent: CaiSection, Activity, Registration (hasMany minors), Minor (belongsTo registration)",
+        "php artisan migrate eseguito senza errori",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-004",
+      "title": "Seeder sezioni CAI da file Excel",
+      "description": "As a developer, I want the 999 CAI sections loaded from the Excel file so the autocomplete dropdown has real data.",
+      "acceptanceCriteria": [
+        "composer require maatwebsite/excel installato",
+        "CaiSectionSeeder legge il file 'docs/materiale iniziale/2026_MS_Sezioni_SottoSezioni_GR_Gruppi Regionali ETS.xlsx', foglio 'Sezioni'",
+        "Per ogni riga inserisce: code=colonna 'codice', name=colonna 'nominativo', region=colonna 'regione', province=colonna 'provincia'",
+        "Salta la riga di intestazione (prima riga)",
+        "Dopo il seed: SELECT COUNT(*) FROM cai_sections restituisce >= 900",
+        "php artisan db:seed --class=CaiSectionSeeder eseguito senza errori",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-005",
+      "title": "Seeder attività (5 rifugi) + seeder utente admin Filament",
+      "description": "As a developer, I want the 5 activities and admin user pre-loaded so the system is ready to use after setup.",
+      "acceptanceCriteria": [
+        "ActivitySeeder inserisce esattamente 5 attività: (1) Rifugio Branca, 'Osservazione cambiamenti climatici, fauna/flora Parco Nazionale dello Stelvio, morfologia delle montagne', '9:00', 'Parcheggio Diga S.Giacomo presso Rif. Forni', max_capacity=50; (2) Rifugio Alpe Corte, 'Forest Bathing con guida di Benessere Forestale', '8:45', 'Parcheggio laghetto Valcanale (Valle Seriana)', max_capacity=50; (3) Rifugio Menaggio, 'Riconoscimento fauna selvatica attraverso gli indici di presenza', '8:45', 'Parcheggio Monti di Breglia', max_capacity=50; (4) Rifugio G. Pirlo allo Spino, 'Lettura del paesaggio con esperto', '8:45', 'Colomber di San Michele – Gardone Riviera', max_capacity=50; (5) Rifugio Carlo Porta, 'Osservazione aspetti botanici', '9:00', 'Ritrovo angolo via Pian dei Resinelli e via Carlo Mauri', max_capacity=50",
+        "AdminSeeder crea un utente Filament con email=FILAMENT_ADMIN_EMAIL e password=FILAMENT_ADMIN_PASSWORD da .env",
+        "DatabaseSeeder chiama CaiSectionSeeder, ActivitySeeder, AdminSeeder nell'ordine",
+        "php artisan db:seed eseguito senza errori",
+        "Typecheck passes"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-006",
+      "title": "API endpoint autocomplete sezioni CAI",
+      "description": "As a frontend developer, I want a JSON endpoint to search CAI sections by name or code so the autocomplete dropdown works.",
+      "acceptanceCriteria": [
+        "Route GET /api/sections?q={query} definita in routes/api.php",
+        "Se query è vuota o < 2 caratteri: restituisce array vuoto []",
+        "Filtra cai_sections dove name LIKE '%query%' OR code LIKE '%query%', case-insensitive",
+        "Risposta JSON: array di oggetti con campi id, code, name, region, province",
+        "Massimo 15 risultati per chiamata",
+        "GET /api/sections?q=Milano restituisce sezioni con 'Milano' nel nome",
+        "Typecheck passes"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "title": "Logica capienza attività + unit test",
+      "description": "As a developer, I want Activity model methods to compute available spots correctly so overbooking is prevented.",
+      "acceptanceCriteria": [
+        "Metodo Activity::availableSpots(): conta i posti occupati come SUM(1 + minors_count) per tutte le registrations di quell'attività, restituisce max_capacity - posti_occupati",
+        "Metodo Activity::isFull(): restituisce true se availableSpots() <= 0",
+        "Unit test: attività con max_capacity=50, 1 iscritto con 2 minori → availableSpots() = 47",
+        "Unit test: attività con max_capacity=50, 50 posti occupati → isFull() = true",
+        "Unit test: attività senza iscritti → availableSpots() = 50",
+        "php artisan test --filter=ActivityTest eseguito senza errori",
+        "Typecheck passes"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-008",
+      "title": "Form frontend – Layout base (header/footer)",
+      "description": "As a user, I want a clean institutional layout so I immediately understand who organizes the event.",
+      "acceptanceCriteria": [
+        "Blade layout resources/views/layouts/app.blade.php con slot @yield('content')",
+        "Header: immagine public/images/cai-logo.png (copiata da docs/materiale iniziale/CAI/Cai_Club_Alpino_Italiano_Stemma.png) + titolo 'Giornata Regionale della Montagna – Regione Lombardia | GRMRL'",
+        "Footer: immagine public/images/ms-logo.png (copiata da docs/materiale iniziale/Montagna Servizi/LOGO_01.png) + 'Realizzato da Montagna Servizi' + dati CAI Lombardia: Via Petrella 19 Milano, gr_cai_lombardia@cai.it, Tel. +393274851177",
+        "Informazioni supporto visibili nel layout: telefono (config('grmrl.phone')), orari (config('grmrl.support_hours')), email (config('grmrl.email')) – letti da .env via config/grmrl.php",
+        "Tailwind CSS installato (npm install && npm run build) oppure CDN incluso",
+        "Design mobile-first: larghezza max-w-2xl centrata, padding responsive",
+        "Route GET / → RegistrationController::showForm restituisce view con layout",
+        "Verify in browser using dev-browser skill",
+        "Typecheck passes"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-009",
+      "title": "Form frontend – Sezione dati adulto",
+      "description": "As an adult user, I want to fill in my personal data so I can register for the event.",
+      "acceptanceCriteria": [
+        "Campi nel form: Nome (text, required), Cognome (text, required), Email (email, required), Telefono (tel, required), Data di nascita (date, required)",
+        "Checkbox 'Sono socio CAI' con Alpine.js x-data per mostrare/nascondere i campi condizionali",
+        "Se socio: campo di testo 'Sezione CAI' con autocomplete che chiama GET /api/sections?q=... al keyup (min 2 caratteri), mostra dropdown con risultati name+province, salva cai_section_id in input hidden, campo required",
+        "Se non socio: campo 'Codice Fiscale' (text, maxlength=16, pattern=[A-Z0-9]{16}, required) + messaggio informativo 'In quanto non socio, sarai assicurato con polizza Soccorso Alpino, RC e Infortuni Combinazione A a carico del GR Lombardia'",
+        "Tutti i campi usano name corretti per il submit: first_name, last_name, email, phone, birth_date, is_cai_member, cai_section_id, fiscal_code",
+        "Verify in browser using dev-browser skill",
+        "Typecheck passes"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-010",
+      "title": "Form frontend – Sezione minori",
+      "description": "As an adult, I want to add up to 3 minors so I can register them for the event.",
+      "acceptanceCriteria": [
+        "Pulsante 'Aggiungi minore' che aggiunge dinamicamente (Alpine.js) un blocco campi per un minore",
+        "Massimo 3 minori: il pulsante è disabilitato quando ci sono già 3 minori",
+        "Per ogni minore: Nome (text, required), Cognome (text, required), Data di nascita (date, required)",
+        "Per ogni minore: checkbox 'Il minore è socio CAI', con lo stesso comportamento condizionale dell'adulto (autocomplete sezione se socio, CF se non socio)",
+        "Pulsante 'Rimuovi' per ogni minore aggiunto che rimuove il blocco e riabilita il pulsante 'Aggiungi' se < 3",
+        "I campi usano nomi array: minors[0][first_name], minors[0][last_name], ecc.",
+        "Verify in browser using dev-browser skill",
+        "Typecheck passes"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-011",
+      "title": "Form frontend – Selezione attività con posti disponibili",
+      "description": "As a user, I want to choose an activity seeing available spots for each so I know if there is room.",
+      "acceptanceCriteria": [
+        "Le 5 attività mostrate come card radio selezionabili (input type=radio name=activity_id)",
+        "Ogni card mostra: nome rifugio (bold), descrizione attività, orario ritrovo, luogo di partenza, numero posti disponibili (es. '48 posti disponibili')",
+        "I posti disponibili calcolati con Activity::availableSpots() nel controller e passati alla view",
+        "Se posti disponibili = 0: card con classe CSS disabilitata, radio disabled, testo 'Attività al completo'",
+        "Se posti disponibili <= 5: testo in arancione 'Solo X posti disponibili'",
+        "Verify in browser using dev-browser skill",
+        "Typecheck passes"
+      ],
+      "priority": 11,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-012",
+      "title": "Form frontend – Consensi, submit e pagina di conferma",
+      "description": "As a user, I want to accept the required conditions and submit my registration so I get a confirmation.",
+      "acceptanceCriteria": [
+        "Quattro checkbox obbligatori (name: privacy_accepted, photo_release_accepted, rules_accepted, weather_cancellation_accepted, equipment_check_accepted): (1) accettazione GDPR + liberatoria foto/video GR CAI Lombardia; (2) 'Ho letto la locandina, compreso itinerario, dislivello e durata. Dichiaro che l'escursione è alla mia portata'; (3) 'Accetto che il Direttore di Escursione possa sospendere/interrompere l'escursione in caso di maltempo, rischio, agibilità del sentiero, ostacoli o imprevisti'; (4) 'Accetto che il Direttore di Escursione possa impedirmi la partecipazione se non ho attrezzatura adeguata'",
+        "Pulsante 'Invia iscrizione' (submit)",
+        "RegistrationController::store: valida tutti i campi server-side (required, email format, CF 16 chars se non socio, activity_id exists, tutti i checkbox = true)",
+        "Se validazione fallisce: redirect back con errori e dati precedenti mantenuti (old())",
+        "Se validazione passa: DB::transaction() con Activity::lockForUpdate(), controlla isFull(), se piena abort con errore, altrimenti crea Registration + Minors",
+        "Se attività piena al momento del lock: messaggio errore 'Siamo spiacenti, i posti per questa attività sono esauriti. Scegli un'altra attività'",
+        "Se successo: redirect a /conferma con session flash contenente email iscritto",
+        "Route GET /conferma → view con messaggio 'Iscrizione completata con successo! Riceverai una email di conferma a {email}'",
+        "Verify in browser using dev-browser skill",
+        "Typecheck passes"
+      ],
+      "priority": 12,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-013",
+      "title": "Email di conferma all'iscritto",
+      "description": "As a newly registered user, I want to receive a confirmation email with my registration details and activity info.",
+      "acceptanceCriteria": [
+        "Mailable App\\Mail\\RegistrationConfirmation con costruttore che accetta Registration (with minors, activity, caiSection)",
+        "Template Blade resources/views/emails/registration-confirmation.blade.php",
+        "Header email: logo CAI (public/images/cai-logo.png come base64 inline) + logo MS (public/images/ms-logo.png come base64 inline)",
+        "Corpo email: titolo 'Conferma iscrizione – Respira la Montagna – 5 luglio 2026', riepilogo adulto (Nome, Cognome, socio/non-socio + sezione), elenco minori se presenti (Nome, Cognome, Data di nascita), dettagli attività (nome rifugio, orario ritrovo, luogo di partenza), frase 'Ti ricordiamo di portare: giacca antivento/pioggia o mantella, capo caldo, cappello, occhiali da sole, crema solare, acqua (minimo 1 litro), pranzo al sacco, snack', riferimenti supporto (email e telefono da config grmrl)",
+        "RegistrationController::store dispatch Mail::to($registration->email)->send(new RegistrationConfirmation($registration)) dopo salvataggio",
+        "In locale: email visibile in MailPit su http://localhost:8025",
+        "Typecheck passes"
+      ],
+      "priority": 13,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-014",
+      "title": "Admin Filament – RegistrationResource (tabella, filtri, ricerca)",
+      "description": "As an admin, I want to view all registrations in the Filament panel so I can monitor sign-ups.",
+      "acceptanceCriteria": [
+        "RegistrationResource in app/Filament/Resources/ con tabella che mostra colonne: Nome (first_name + last_name), Email, Telefono, Attività (activity.name), Num. minori (count di minors), Data iscrizione (created_at formatted), Socio CAI (is_cai_member Sì/No), Sezione (caiSection.name o 'Non socio')",
+        "SelectFilter per attività (filtra per activity_id)",
+        "TextInputFilter o SearchBar per nome, cognome, email",
+        "Pagina di dettaglio (view) con tutti i dati dell'iscritto e dei minori",
+        "Accesso al pannello /admin richiede login con credenziali da .env",
+        "Verify in browser using dev-browser skill",
+        "Typecheck passes"
+      ],
+      "priority": 14,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-015",
+      "title": "Admin Filament – Export Excel + vista stampabile per accompagnatori",
+      "description": "As an admin, I want to export registrations to Excel and print a list for CAI guides.",
+      "acceptanceCriteria": [
+        "Pulsante 'Esporta Excel' nella tabella Filament (ExportAction o custom action) che scarica file .xlsx",
+        "Export include per ogni iscrizione: Nome adulto, Cognome adulto, Email, Telefono, Attività, Sezione CAI (o 'Non socio'), poi per ogni minore (su colonne aggiuntive o righe): Nome, Cognome, Data di nascita",
+        "Se un filtro attività è attivo nell'UI, l'export rispetta il filtro",
+        "Route GET /admin/registrations/print?activity_id={id} accessibile solo da utenti autenticati Filament",
+        "Vista stampabile mostra intestazione con nome attività e data evento, poi tabella: Nome e Cognome adulto, Email, Telefono, Minori (nomi separati da virgola)",
+        "CSS @media print: nasconde navigazione Filament, mostra solo la tabella",
+        "Verify in browser using dev-browser skill",
+        "Typecheck passes"
+      ],
+      "priority": 15,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}
