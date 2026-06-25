@@ -48,9 +48,9 @@
                 <p class="font-medium">Realizzato da Montagna Servizi</p>
                 <p>CAI Lombardia – Via Petrella 19, Milano</p>
                 <p>
-                    <a href="mailto:gr_cai_lombardia@cai.it" class="hover:underline">gr_cai_lombardia@cai.it</a>
+                    <a href="mailto:{{ config('grmrl.support_email') }}" class="hover:underline">{{ config('grmrl.support_email') }}</a>
                     &nbsp;|&nbsp;
-                    <a href="tel:+393274851177" class="hover:underline">Tel. +393274851177</a>
+                    <a href="tel:{{ config('grmrl.support_phone') }}" class="hover:underline">Tel. {{ config('grmrl.support_phone') }}</a>
                 </p>
             </div>
         </div>
