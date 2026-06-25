@@ -16,7 +16,7 @@
 <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
     <h3 class="text-xl font-semibold text-gray-800 mb-4">L'iniziativa</h3>
     <p class="text-gray-700 leading-relaxed mb-4">
-        La Giornata Regionale della Montagna è un evento organizzato dal Club Alpino Italiano – Sezione Lombardia
+        La Giornata Regionale della Montagna è un evento organizzato dal Club Alpino Italiano – Gruppo Regionale Lombardia
         per avvicinare grandi e piccoli alla montagna attraverso escursioni guidate, attività all'aria aperta
         e momenti di condivisione nella natura.
     </p>
