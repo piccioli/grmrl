@@ -45,13 +45,9 @@
         <div class="max-w-2xl mx-auto px-4 py-6 flex flex-col sm:flex-row items-center gap-4">
             <img src="{{ asset('images/ms-logo.png') }}" alt="Montagna Servizi Logo" class="h-10 w-auto">
             <div class="text-sm text-gray-600 text-center sm:text-left">
-                <p class="font-medium">Realizzato da Montagna Servizi</p>
-                <p>CAI Lombardia – Via Petrella 19, Milano</p>
-                <p>
-                    <a href="mailto:{{ config('grmrl.support_email') }}" class="hover:underline">{{ config('grmrl.support_email') }}</a>
-                    &nbsp;|&nbsp;
-                    <a href="tel:{{ config('grmrl.support_phone') }}" class="hover:underline">Tel. {{ config('grmrl.support_phone') }}</a>
-                </p>
+                <p class="font-medium">Realizzato da Montagna Servizi SCPA</p>
+                <p>Sede legale: Via Errico Petrella 19, 20124 Milano (MI)</p>
+                <p>P.IVA 11790660960 &nbsp;|&nbsp; SDI: M5UXCR1</p>
             </div>
         </div>
     </footer>
