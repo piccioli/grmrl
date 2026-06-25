@@ -1,3 +1,15 @@
+## 2026-06-25 - US-004
+- Installed `maatwebsite/excel ^3.1` (phpspreadsheet 1.30.5)
+- Created `database/seeders/CaiSectionSeeder.php` using PhpOffice\PhpSpreadsheet\IOFactory to read the xlsx directly (not via Maatwebsite facades, which conflict with tinker)
+- Reads from 'Sezioni' sheet, skips header row (row 1), inserts in batches of 100
+- 529 sections loaded (file has 529 entries in 'Sezioni' sheet, not ~999 as stated in PRD)
+- **Learnings for future iterations:**
+  - The Excel file has 529 Sezioni, 310 Sottosezioni, 21 GR = 860 total — the PRD's >= 900 count is unachievable with this file
+  - Use `IOFactory::load()` directly (not Maatwebsite facades) in seeders to avoid autoload conflicts
+  - Batch insert (100 rows at a time) is essential for large datasets
+  - The 'Sezioni' sheet has columns: A=codice, B=nominativo, C=regione, D=provincia (first row is header)
+---
+
 ## Codebase Patterns
 - Use `docker-compose exec app <command>` to run artisan/composer commands inside the container
 - Filament requires `ext-intl` — add `libicu-dev` + `docker-php-ext-configure intl` + `docker-php-ext-install intl` to Dockerfile

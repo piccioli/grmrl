@@ -68,8 +68,8 @@
         "Typecheck passes"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "maatwebsite/excel 3.1.69 installato. CaiSectionSeeder legge il foglio 'Sezioni' dal file xlsx: salta riga di intestazione, carica in batch da 100 righe. Il file contiene 529 sezioni (non 999 come indicato nel PRD - la discrepanza è nel file sorgente). Il seeder funziona correttamente."
     },
     {
       "id": "US-005",
