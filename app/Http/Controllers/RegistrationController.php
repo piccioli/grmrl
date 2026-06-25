@@ -53,7 +53,33 @@ class RegistrationController extends Controller
             }
         }
 
-        return view('registration.form', compact('activity', 'preloadedSectionName'));
+        $preloadedMinors = [];
+        if ($oldMinors = old('minors')) {
+            $sectionIds = collect($oldMinors)->pluck('cai_section_id')->filter()->unique()->values();
+            $sectionsMap = [];
+            if ($sectionIds->isNotEmpty()) {
+                CaiSection::whereIn('id', $sectionIds)->get()->each(function (CaiSection $s) use (&$sectionsMap) {
+                    $sectionsMap[$s->id] = $s->name . ($s->province ? ' (' . $s->province . ')' : '');
+                });
+            }
+
+            foreach ($oldMinors as $minor) {
+                $sectionId = $minor['cai_section_id'] ?? null;
+                $preloadedMinors[] = [
+                    'first_name'     => $minor['first_name'] ?? '',
+                    'last_name'      => $minor['last_name'] ?? '',
+                    'birth_date'     => $minor['birth_date'] ?? '',
+                    'is_cai_member'  => ! empty($minor['is_cai_member']),
+                    'cai_section_id' => $sectionId ?? '',
+                    'fiscal_code'    => $minor['fiscal_code'] ?? '',
+                    'sectionQuery'   => ($sectionId && isset($sectionsMap[$sectionId])) ? $sectionsMap[$sectionId] : '',
+                    'sectionResults' => [],
+                    'showDropdown'   => false,
+                ];
+            }
+        }
+
+        return view('registration.form', compact('activity', 'preloadedSectionName', 'preloadedMinors'));
     }
 
     public function store(Request $request, Activity $activity): RedirectResponse

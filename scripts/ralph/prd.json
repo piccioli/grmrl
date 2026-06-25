@@ -1,0 +1,124 @@
+{
+  "project": "GRMRL",
+  "branchName": "ralph/iterazione-4",
+  "description": "Quarta iterazione: fix form (persistenza dati minori + sezione CAI adulto), export/stampa admin, email duplicata (client + server), recap completo nella conferma e nell'email.",
+  "userStories": [
+    {
+      "id": "US-029",
+      "title": "Persistenza sezione CAI adulto su errore form",
+      "description": "As a user, I want the CAI section I selected to remain visible after a failed form submission so I don't have to search and select it again.",
+      "acceptanceCriteria": [
+        "Dopo un errore di validazione, il campo sezione CAI adulto mostra la sezione precedentemente selezionata (nome visibile nell'autocomplete)",
+        "L'ID della sezione è correttamente pre-valorizzato nell'input hidden cai_section_id",
+        "Il comportamento è coerente con il resto dei campi che usano old()",
+        "Typecheck/lint passa"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-030",
+      "title": "Persistenza dati minori su errore form (inclusa sezione CAI)",
+      "description": "As a user, I want all the minor data I entered (including their CAI section) to remain after a failed form submission so I don't have to re-enter everything.",
+      "acceptanceCriteria": [
+        "Dopo un errore di validazione, tutti i minori precedentemente aggiunti vengono ripristinati (nome, cognome, data di nascita, socio sì/no, codice fiscale)",
+        "Per ogni minore che era socio CAI, la sezione CAI selezionata rimane visibile nell'autocomplete",
+        "Il numero di minori mostrati corrisponde a quello precedentemente inserito",
+        "I campi condizionali (sezione / codice fiscale) si mostrano/nascondono correttamente in base al flag is_cai_member",
+        "Typecheck/lint passa"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-031",
+      "title": "Validazione email duplicata on blur (client-side)",
+      "description": "As a user, I want to be immediately notified when I enter an email already used for another registration so I can correct it before submitting.",
+      "acceptanceCriteria": [
+        "Nuovo endpoint GET /api/check-email?email=... restituisce JSON {exists: true/false}",
+        "Quando il focus lascia il campo email, parte una fetch verso l'endpoint",
+        "Se exists: true, compare un messaggio di errore inline sotto il campo",
+        "Se exists: false, il messaggio di errore scompare",
+        "Il submit del form è bloccato se è presente questo errore inline",
+        "Typecheck/lint passa"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-032",
+      "title": "Validazione email duplicata al submit (server-side)",
+      "description": "As a developer, I want the server to reject duplicate emails on form submission as a safety net.",
+      "acceptanceCriteria": [
+        "La validazione server-side nel metodo store() include la regola unique:registrations,email",
+        "In caso di email duplicata al submit, l'utente vede il messaggio di errore sul campo email",
+        "I dati del form vengono preservati (withInput) anche per questo errore",
+        "Typecheck/lint passa"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-033",
+      "title": "Export Excel /admin/registrations/export",
+      "description": "As an admin, I want to download a complete Excel export of registrations so I can analyze data offline.",
+      "acceptanceCriteria": [
+        "GET /admin/registrations/export risponde con download di un file .xlsx (non 404)",
+        "Il file include tutte le colonne già definite in RegistrationsExport (adulto + 3 slot minori)",
+        "Il parametro opzionale ?activity_id=X filtra correttamente per attività",
+        "Il download funziona senza errori anche se non ci sono registrazioni",
+        "Typecheck/lint passa"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-034",
+      "title": "Stampa PDF /admin/registrations/print",
+      "description": "As an admin, I want to generate a print-ready PDF of registrations.",
+      "acceptanceCriteria": [
+        "GET /admin/registrations/print risponde con download di un file PDF (non 404)",
+        "Il PDF contiene una tabella con: Nome, Cognome, Email, Telefono, Attività, Socio CAI, Sezione, Minori",
+        "Il parametro opzionale ?activity_id=X filtra per attività",
+        "Typecheck/lint passa"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-035",
+      "title": "Recap completo nella pagina /conferma",
+      "description": "As a user, I want the confirmation page to show all the data I entered so I can verify everything was recorded correctly.",
+      "acceptanceCriteria": [
+        "Sezione adulto mostra: Nome, Cognome, Data di nascita (gg/mm/aaaa), Email, Telefono, Socio CAI (Sì/No), Sezione CAI (se socio) o Codice Fiscale (se non socio)",
+        "Per ogni minore: Nome, Cognome, Data di nascita (gg/mm/aaaa), Socio CAI (Sì/No), Sezione CAI (se socio) o Codice Fiscale (se non socio)",
+        "I dati vengono caricati dalla relazione $registration->load('caiSection', 'minors.caiSection')",
+        "Se una sezione non è presente (non socio), mostra 'Non socio CAI'",
+        "Typecheck/lint passa"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-036",
+      "title": "Recap completo nell'email di conferma",
+      "description": "As a user, I want the confirmation email to show all the data I entered so I have a complete record of my registration.",
+      "acceptanceCriteria": [
+        "Sezione adulto nell'email mostra: Nome, Cognome, Data di nascita, Email, Telefono, Socio CAI (Sì/No), Sezione CAI (se socio) o Codice Fiscale (se non socio)",
+        "Per ogni minore nell'email: Nome, Cognome, Data di nascita, Socio CAI (Sì/No), Sezione CAI (se socio) o Codice Fiscale (se non socio)",
+        "Il Mailable passa il record $registration con le relazioni caricate",
+        "Typecheck/lint passa"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}

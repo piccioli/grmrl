@@ -215,7 +215,7 @@
     {{-- Sezione minori --}}
     <div
         x-data="{
-            minors: [],
+            minors: @json($preloadedMinors),
             addMinor() {
                 if (this.minors.length >= 3) return;
                 this.minors.push({
