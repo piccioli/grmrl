@@ -18,8 +18,8 @@
         "Typecheck passes"
       ],
       "priority": 1,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Usato PHP 8.4-fpm invece di 8.3: Laravel 13 richiede PHP >= 8.4 via Symfony 8. Laravel 11 bloccato da security advisories Composer."
     },
     {
       "id": "US-002",
