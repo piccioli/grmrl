@@ -1,122 +1,96 @@
 {
   "project": "GRMRL",
-  "branchName": "ralph/form-flow-redesign",
-  "description": "Redesign del flusso di iscrizione: landing page → selezione attività → form. Gestione attività da Filament, contatti supporto MS in header, validazione in italiano, minore obbligatorio, seeder attività esaurita.",
+  "branchName": "ralph/iterazione-3",
+  "description": "Terza iterazione: correzione denominazione organizzazione, bottone INIZIA, footer contatti allineati, errore minori obbligatori, validazione sezione CAI per minori soci, pagina /conferma con riepilogo completo.",
   "userStories": [
     {
-      "id": "US-016",
-      "title": "Contatti di supporto Montagna Servizi in header",
-      "description": "As an admin, I want the header to show Montagna Servizi support contacts (not CAI regional) so that users contact the right support channel.",
+      "id": "US-023",
+      "title": "Correzione denominazione organizzazione",
+      "description": "As a developer, I want to fix the organization name so that the correct official name is used consistently.",
       "acceptanceCriteria": [
-        "Aggiungere a .env.example le variabili GRMRL_SUPPORT_PHONE e GRMRL_SUPPORT_EMAIL",
-        "Aggiornare config/grmrl.php con le chiavi support_phone (default '+39 02 555 555') e support_email (default 'grmrl@montagnaservizi.com')",
-        "Il layout resources/views/layouts/app.blade.php mostra config('grmrl.support_phone') e config('grmrl.support_email') nell'header al posto dei vecchi GRMRL_PHONE/GRMRL_EMAIL (contatti CAI regionali)",
-        "I vecchi valori GRMRL_PHONE e GRMRL_EMAIL non sono più visibili nell'header (possono restare in config ma non devono apparire nel layout)",
-        "Verify in browser using dev-browser skill",
-        "Typecheck passes"
+        "Sostituire ogni occorrenza di 'Club Alpino Italiano – Sezione Lombardia' con 'Club Alpino Italiano – Gruppo Regionale Lombardia' in tutti i file blade e PHP (escluso vendor e storage)",
+        "Nessuna occorrenza del testo vecchio rimane nel codebase (verificabile con grep)",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
       ],
       "priority": 1,
       "passes": true,
       "notes": ""
     },
     {
-      "id": "US-017",
-      "title": "Landing page con bottone Inizia",
-      "description": "As a visitor, I want to land on a welcoming page that describes the initiative so that I understand what I'm signing up for before starting.",
+      "id": "US-024",
+      "title": "Bottone INIZIA maiuscolo con padding corretto",
+      "description": "As a visitor, I want the CTA button on the landing page to be clearly styled and readable so that it attracts attention.",
       "acceptanceCriteria": [
-        "La route GET / mostra una nuova landing page (non più il form di iscrizione)",
-        "La view resources/views/welcome.blade.php (o nuova view resources/views/landing.blade.php) estende layouts.app e contiene: titolo 'Respira la Montagna – Giornata Regionale della Montagna', data e luogo dell'evento (5 luglio 2026), breve testo descrittivo dell'iniziativa, bottone 'Inizia' che porta a GET /attivita",
-        "RegistrationController::showForm (o nuovo metodo index) gestisce GET / e restituisce la landing view",
-        "Verify in browser using dev-browser skill",
-        "Typecheck passes"
+        "Il testo nel template HTML è 'INIZIA' (tutto maiuscolo, non via classe CSS uppercase su testo minuscolo)",
+        "Il padding è visivamente equilibrato (es. px-12 py-4 o equivalente)",
+        "Il bottone ha dimensione e aspetto da CTA principale chiaramente cliccabile",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
       ],
       "priority": 2,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
-      "id": "US-018",
-      "title": "Pagina selezione attività con card",
-      "description": "As a visitor, I want to see the 5 available activities as cards so that I can choose the one I prefer before filling in personal data.",
+      "id": "US-025",
+      "title": "Footer con contatti allineati all'header",
+      "description": "As a user, I want the footer to show the same phone and email as the header so that the contact information is consistent.",
       "acceptanceCriteria": [
-        "Route GET /attivita restituisce una view con le 5 card delle attività attive (is_active = true)",
-        "Ogni card mostra: nome attività (bold), luogo di ritrovo (meeting_place), orario (meeting_time), descrizione, posti disponibili rimasti calcolati con availableSpots()",
-        "Card con isFull() === true: visivamente disabilitata (grigia), non cliccabile, testo 'Esaurita'",
-        "Card disponibile: cliccabile, porta a GET /iscriviti/{activity}",
-        "Se tutte le attività sono esaurite: messaggio 'Tutte le iniziative sono al completo'",
-        "Verify in browser using dev-browser skill",
-        "Typecheck passes"
+        "In resources/views/layouts/app.blade.php il footer usa config('grmrl.support_phone') e config('grmrl.support_email') al posto dei valori hardcoded",
+        "I link href='tel:...' e href='mailto:...' nel footer usano gli stessi valori config dell'header",
+        "Nessun valore hardcoded di telefono o email rimane nel footer del layout",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
       ],
       "priority": 3,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
-      "id": "US-019",
-      "title": "Routing aggiornato e form con attività pre-selezionata",
-      "description": "As a visitor, I want the form to already have the activity I chose pre-selected so that I don't have to re-choose it.",
+      "id": "US-026",
+      "title": "Errore visibile quando non è stato aggiunto nessun minore",
+      "description": "As a user who forgets to add a minor, I want to see a clear error message so that I understand what is missing.",
       "acceptanceCriteria": [
-        "Route GET /iscriviti/{activity} mostra il form di iscrizione con l'attività pre-selezionata (activity passata come parametro route model binding)",
-        "Se l'attività non esiste o isFull() === true: redirect a /attivita con messaggio flash 'Questa attività non è più disponibile'",
-        "Il form mostra il nome dell'attività in modo non modificabile (testo) e include un campo hidden activity_id con il valore dell'attività",
-        "La sezione 'Selezione attività' con le radio card è rimossa dal form (l'attività è già determinata dall'URL)",
-        "Route POST /iscriviti/{activity} gestisce il submit (sostituisce POST /)",
-        "Le route GET / e POST / del vecchio form vengono rimosse da routes/web.php",
-        "Verify in browser using dev-browser skill",
-        "Typecheck passes"
+        "Aggiungere @error('minors') ... @enderror nella view registration/form.blade.php nella sezione 'Minori accompagnati'",
+        "Il messaggio 'È obbligatorio aggiungere almeno un minore.' è visibile in rosso quando il form è inviato senza minori",
+        "La sezione minori mostra uno stato visivo di errore (bordo o sfondo rosso) quando è presente l'errore",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
       ],
       "priority": 4,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
-      "id": "US-020",
-      "title": "Validazione form in italiano e minore obbligatorio",
-      "description": "As a visitor, I want validation messages in Italian and the form must require at least one minor.",
+      "id": "US-027",
+      "title": "Validazione server-side sezione CAI per minori soci",
+      "description": "As a developer, I want the server to validate that a minor who is a CAI member has a section selected so that the data is consistent.",
       "acceptanceCriteria": [
-        "RegistrationController::store: tutti i messaggi di validazione sono in italiano (array 'messages' passato al Validator o validate())",
-        "La regola 'minors' richiede almeno un elemento: 'minors' => 'required|array|min:1' con messaggio 'È obbligatorio aggiungere almeno un minore'",
-        "Nessun messaggio di errore in inglese visibile all'utente finale nel form",
-        "I messaggi di errore esistenti nel Blade (loop su $errors) continuano a funzionare",
-        "Verify in browser using dev-browser skill",
+        "In RegistrationController::store() aggiungere regola condizionale: minors.*.cai_section_id è obbligatorio quando minors.*.is_cai_member è truthy",
+        "La regola verifica anche l'esistenza dell'ID in cai_sections",
+        "Aggiungere messaggio di errore in italiano: 'La sezione CAI del minore è obbligatoria per i soci.'",
+        "Il form mostra gli errori per i campi minori (aggiungere gestione @error se assente)",
         "Typecheck passes"
       ],
       "priority": 5,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
-      "id": "US-021",
-      "title": "ActivityResource in Filament",
-      "description": "As an admin, I want to manage activities from the Filament panel so that I can update descriptions, times, and capacity without touching the code.",
+      "id": "US-028",
+      "title": "Pagina /conferma con riepilogo completo",
+      "description": "As a user who just registered, I want the confirmation page to show the full recap of my registration so that I can verify the data without opening the email.",
       "acceptanceCriteria": [
-        "Esiste app/Filament/Resources/ActivityResource.php con pagine List e Edit",
-        "Tabella lista mostra colonne: Nome (name), Luogo (meeting_place), Orario (meeting_time), Capienza (max_capacity), Posti rimasti (calcolati con availableSpots()), Stato (is_active toggle)",
-        "Form di modifica espone i campi: name (TextInput required), description (Textarea), meeting_time (TextInput), meeting_place (TextInput), max_capacity (TextInput numeric), is_active (Toggle)",
-        "Azione Edit disponibile su ogni riga; nessuna azione Delete",
-        "Verify in browser using dev-browser skill",
-        "Typecheck passes"
+        "RegistrationController::store() salva l'ID iscrizione in sessione: session(['registration_id' => $registration->id])",
+        "RegistrationController::confirm() recupera il record Registration con le relazioni activity, minors, minors.caiSection, caiSection e lo passa alla view",
+        "Se registration_id non è in sessione, la view mostra solo il messaggio di successo generico senza recap",
+        "La view registration/confirm.blade.php mostra: nome e cognome adulto, sezione CAI o 'Non socio CAI', lista minori (nome, cognome, data di nascita, sezione CAI o non socio), box attività con nome/orario/luogo",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
       ],
       "priority": 6,
-      "passes": true,
-      "notes": ""
-    },
-    {
-      "id": "US-022",
-      "title": "FakeRegistrationsSeeder – attività random esaurita",
-      "description": "As a developer, I want a seeder that fills a random activity to 50 participants so that I can test the sold-out UI without manual data entry.",
-      "acceptanceCriteria": [
-        "Esiste database/seeders/FakeRegistrationsSeeder.php",
-        "Il seeder sceglie casualmente una delle 5 attività con Activity::inRandomOrder()->first()",
-        "Crea iscrizioni fake (Registration + 1 Minor ciascuna) in loop finché availableSpots() <= 0 (ogni iscrizione occupa 2 posti: 1 adulto + 1 minore)",
-        "I dati fake sono plausibili: nome/cognome casuali, email valida, cai_section_id da una sezione esistente, fiscal_code di 16 caratteri, tutti i checkbox = true",
-        "Dopo l'esecuzione l'attività scelta ha isFull() === true",
-        "Il seeder è invocabile standalone: php artisan db:seed --class=FakeRegistrationsSeeder",
-        "Il seeder NON è aggiunto a DatabaseSeeder (solo uso manuale)",
-        "Typecheck passes"
-      ],
-      "priority": 7,
-      "passes": true,
+      "passes": false,
       "notes": ""
     }
   ]
