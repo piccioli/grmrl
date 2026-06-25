@@ -18,8 +18,8 @@
         "Typecheck passes"
       ],
       "priority": 1,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Usato PHP 8.4-fpm invece di 8.3: Laravel 13 richiede PHP >= 8.4 via Symfony 8. Laravel 11 bloccato da security advisories Composer."
     },
     {
       "id": "US-002",
@@ -34,8 +34,8 @@
         "Typecheck passes"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Filament 3.3.54 installato con --with-all-dependencies (downgrade symfony/console da v8 a v7.4 per compatibilità). Aggiunta estensione intl al Dockerfile. User model implementa FilamentUser. /admin/login risponde 200."
     },
     {
       "id": "US-003",
@@ -51,8 +51,8 @@
         "Typecheck passes"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "4 migrations + 4 Eloquent models created. Activity has availableSpots() and isFull() methods included here as they are needed by the schema. All migrations ran without errors."
     },
     {
       "id": "US-004",
@@ -68,8 +68,8 @@
         "Typecheck passes"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "maatwebsite/excel 3.1.69 installato. CaiSectionSeeder legge il foglio 'Sezioni' dal file xlsx: salta riga di intestazione, carica in batch da 100 righe. Il file contiene 529 sezioni (non 999 come indicato nel PRD - la discrepanza è nel file sorgente). Il seeder funziona correttamente."
     },
     {
       "id": "US-005",
@@ -83,8 +83,8 @@
         "Typecheck passes"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "ActivitySeeder crea 5 attività (rifugi) con dati esatti dal PRD. AdminSeeder usa firstOrCreate con FILAMENT_ADMIN_EMAIL/PASSWORD da .env. DatabaseSeeder chiama i 3 seeder nell'ordine corretto. Tutti i test passano."
     },
     {
       "id": "US-006",
@@ -100,8 +100,8 @@
         "Typecheck passes"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "SectionController invokable in app/Http/Controllers/Api/. api.php route registered in bootstrap/app.php via withRouting(api:). Returns [] for < 2 chars, max 15 results, filters by name OR code LIKE. Tested live: GET /api/sections?q=Milano → 1 result; GET /api/sections?q=al → 15 results (limit enforced); GET /api/sections?q= → []."
     },
     {
       "id": "US-007",
@@ -117,8 +117,8 @@
         "Typecheck passes"
       ],
       "priority": 7,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "ActivityFactory, RegistrationFactory, MinorFactory created. HasFactory trait added to Activity, Registration, Minor models. 3 unit tests cover: adult+2 minors=47 spots, 50 registrations=isFull, 0 registrations=50 spots. All pass."
     },
     {
       "id": "US-008",
@@ -136,8 +136,8 @@
         "Typecheck passes"
       ],
       "priority": 8,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "config/grmrl.php reads GRMRL_PHONE/EMAIL/SUPPORT_HOURS from .env. Logos copied to public/images/. Blade layout resources/views/layouts/app.blade.php with header (CAI logo + title), support bar (phone/hours/email from config), main slot, footer (MS logo + CAI Lombardia contacts). RegistrationController::showForm returns registration.form view. npm run build succeeded with Tailwind 4 + Vite 8. All 5 tests pass. GET / → HTTP 200."
     },
     {
       "id": "US-009",
@@ -153,8 +153,8 @@
         "Typecheck passes"
       ],
       "priority": 9,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Alpine.js 3.15 installed via npm; initialized in resources/js/app.js. Form section added to registration/form.blade.php with x-data for isCaiMember toggle. All fields present with correct names: first_name, last_name, email, phone, birth_date, is_cai_member, cai_section_id (hidden), fiscal_code. CAI section autocomplete: fetches /api/sections?q= on keyup (min 2 chars), shows dropdown with name+province, saves id in hidden input. Non-socio shows fiscal_code field + insurance info message. Stub routes added: POST / (registrations.store), GET /conferma (registrations.confirm). All 5 tests pass."
     },
     {
       "id": "US-010",
@@ -171,8 +171,8 @@
         "Typecheck passes"
       ],
       "priority": 10,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Alpine.js x-data component for minors array. addMinor() pushes a new minor object (max 3, button disabled at cap); removeMinor(index) splices it out. Each minor has own state: first_name, last_name, birth_date, is_cai_member, cai_section_id, fiscal_code, sectionQuery, sectionResults, showDropdown. searchSections(index)/selectSection(index,section) handle per-minor autocomplete. Field names use array syntax: minors[N][field]. x-cloak hides conditional blocks (CAI section / fiscal_code). All 5 tests pass."
     },
     {
       "id": "US-011",
@@ -188,8 +188,8 @@
         "Typecheck passes"
       ],
       "priority": 11,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "RegistrationController::showForm() queries active activities ordered by id, maps each to an array with available_spots and is_full computed via Activity::availableSpots()/isFull(). View renders 5 radio cards: bold name, description, meeting_time, meeting_place, spot count. Spot count is red 'Attività al completo' if full, orange 'Solo X posti disponibili' if <=5, green otherwise. Disabled card+radio when full. old('activity_id') pre-selects on validation error. Added RefreshDatabase to ExampleTest (DB query now hits activities table which didn't exist in in-memory SQLite without it). All 5 tests pass."
     },
     {
       "id": "US-012",
@@ -208,8 +208,8 @@
         "Typecheck passes"
       ],
       "priority": 12,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Implemented store() in RegistrationController with full server-side validation (required, email, fiscal_code size:16, activity_id exists, all checkboxes accepted). DB::transaction with Activity::lockForUpdate() + isFull() check — redirects back with activity_id error if full. Creates Registration + Minors on success, redirects to /conferma with email in session flash. Added 5 consent checkboxes (privacy, photo_release, rules, weather_cancellation, equipment_check) and submit button 'Invia iscrizione' to form. Confirmation view already correct from US-009 stub. All 5 tests pass."
     },
     {
       "id": "US-013",
@@ -225,8 +225,8 @@
         "Typecheck passes"
       ],
       "priority": 13,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Mailable App\\Mail\\RegistrationConfirmation accepts a Registration (auto-loads minors, activity, caiSection). Constructor encodes cai-logo.png and ms-logo.png as base64 strings. Blade template emails/registration-confirmation.blade.php: header with inline base64 logos, body with adult data (name, CAI membership + section), minors block (name, DOB, CAI), activity box (name, meeting_time, meeting_place), equipment reminder list, support contacts from config('grmrl.*'). RegistrationController::store dispatches Mail::to()->send() after DB transaction succeeds. In-locale: email visible in MailPit on http://localhost:8025. All 5 tests pass."
     },
     {
       "id": "US-014",
@@ -242,8 +242,8 @@
         "Typecheck passes"
       ],
       "priority": 14,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "RegistrationResource created in app/Filament/Resources/ with table columns: full name (searchable on first_name+last_name), email (searchable), phone, activity.name, minors_count, created_at (d/m/Y H:i), is_cai_member (Sì/No), caiSection.name (default 'Non socio'). SelectFilter on activity_id, custom Filter with TextInput for nome/cognome/email search. ViewAction leads to ViewRegistration page with infolist: Dati adulto section (8 fields), Attività scelta section (3 fields), Minori repeatable section (hidden when empty), Consensi section (5 checkboxes). Routes: admin/registrations (list), admin/registrations/{record} (view). All 5 tests pass."
     },
     {
       "id": "US-015",
@@ -260,8 +260,8 @@
         "Typecheck passes"
       ],
       "priority": 15,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "RegistrationsExport (FromQuery+WithHeadings+WithMapping) in app/Exports/ — 17 columns: adult data (8) + up to 3 minors (3 cols each). Optional activityId filter passed as constructor arg. ExportController in app/Http/Controllers/Admin/: export() returns Excel::download(), print() returns admin.print Blade view. Both routes GET /admin/registrations/export and GET /admin/registrations/print protected by auth middleware. ListRegistrations header actions: 'Esporta Excel' and 'Vista stampabile' — each passes current activity_id filter via URL. Print view: standalone HTML (no Filament layout), print button, table with adult name/email/phone/section/minors list, @media print hides .no-print. All 5 tests pass."
     }
   ]
 }

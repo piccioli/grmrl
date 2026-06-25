@@ -1,0 +1,209 @@
+## 2026-06-25 - US-015
+- Created `app/Exports/RegistrationsExport.php` (FromQuery + WithHeadings + WithMapping): 17 fixed columns (8 adult + 3×3 minor slots), optional activityId filter
+- Created `app/Http/Controllers/Admin/ExportController.php`: export() → Excel::download(), print() → admin.print view with optional activity filter
+- Created `resources/views/admin/print.blade.php`: standalone print page, table (name/email/phone/section/minors), @media print hides .no-print div
+- Updated `routes/web.php`: `Route::middleware(['auth'])->prefix('admin/registrations')` group for export + print routes
+- Updated `app/Filament/Resources/RegistrationResource/Pages/ListRegistrations.php`: added getHeaderActions() with 'Esporta Excel' + 'Vista stampabile' actions using current tableFilters['activity_id']['value']
+- Routes: admin/registrations/export (admin.export), admin/registrations/print (admin.print) — both auth-protected
+- All 5 tests pass
+- **Learnings for future iterations:**
+  - `RegistrationsExport` uses `FromQuery` not `FromCollection` — allows Eloquent scoping + lazy loading; `WithMapping` maps each model to a flat array row
+  - Fixed-column approach for minors (up to 3 slots) vs dynamic rows — simpler for admin spreadsheets
+  - Filament `getHeaderActions()` on `ListRecords` page: use `Filament\Actions\Action` (not `Filament\Tables\Actions\Action`); `->openUrlInNewTab()` for file downloads
+  - `$this->tableFilters['activity_id']['value']` accesses SelectFilter state in Livewire component
+  - Print route placed before `/{record}` in route list — Laravel matches more specific paths first; works correctly
+  - `array_filter([...])` on URL params removes null/empty values cleanly
+---
+
+## 2026-06-25 - US-014
+- Created `app/Filament/Resources/RegistrationResource.php` with table (8 columns), 2 filters, ViewAction; infolist with 4 sections
+- Created `app/Filament/Resources/RegistrationResource/Pages/ListRegistrations.php`
+- Created `app/Filament/Resources/RegistrationResource/Pages/ViewRegistration.php`
+- Table columns: full_name (getStateUsing + searchable on first_name/last_name), email (searchable), phone, activity.name, minors_count (counts('minors')), created_at, is_cai_member (Sì/No), caiSection.name (default 'Non socio')
+- Filters: SelectFilter on activity_id, custom Filter with TextInput for nome/cognome/email (LIKE search)
+- Infolist: Dati adulto (2 col grid), Attività scelta (3 col), Minori (RepeatableEntry, hidden when empty), Consensi (2 col)
+- `getEloquentQuery()` eager-loads activity, caiSection, minors.caiSection
+- Routes verified via `php artisan route:list`: admin/registrations and admin/registrations/{record}
+- All 5 tests pass
+- **Learnings for future iterations:**
+  - `TextColumn::make()->counts('minors')` adds `withCount('minors')` automatically — column must be named `minors_count`
+  - `getStateUsing()` with `searchable(['col1','col2'])` allows computed display name but DB search on real columns
+  - `RepeatableEntry::make('minors')` in infolists iterates a HasMany relation — no extra config needed
+  - `->hidden(fn (ModelClass $record) => ...)` on a Section hides it dynamically based on record state
+  - AdminPanelProvider uses `discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')` — place resources there and they auto-register
+---
+
+## 2026-06-25 - US-013
+- Created `app/Mail/RegistrationConfirmation.php` Mailable; constructor accepts Registration, auto-loads minors/activity/caiSection, encodes both logos as base64 strings
+- Created `resources/views/emails/registration-confirmation.blade.php` with inline base64 logos in header+footer, adult data, minors block, activity box, equipment reminder, support contacts from config('grmrl.*')
+- Updated `RegistrationController::store()`: added `Mail::to($registration->email)->send(new RegistrationConfirmation($registration))` after successful DB transaction
+- All 5 tests pass; no syntax errors in new files
+- **Learnings for future iterations:**
+  - `base64_encode(file_get_contents(public_path('images/file.png')))` to embed images inline in emails — avoids external URL dependency
+  - Mailable `content()` returns a `Content` view and all public properties are automatically passed to the Blade template
+  - `$registration->load(['minors', 'activity', 'caiSection'])` in constructor ensures eager-loaded relations available in the view
+  - Minor model already has `caiSection()` BelongsTo — no change needed
+---
+
+## 2026-06-25 - US-012
+- Implemented `RegistrationController::store()` with full server-side validation: required fields, email format, `fiscal_code` size:16 when not CAI member, `cai_section_id` required when CAI member, `activity_id` exists, all 5 consent checkboxes required with `accepted` rule
+- `DB::transaction()` with `Activity::lockForUpdate()->findOrFail()`; if `isFull()` inside transaction, sets `$registration = null` and exits closure; after transaction, redirects back with `activity_id` error message
+- On success: creates `Registration` + loops over `minors` to create `Minor` records; redirects to `/conferma` with `email` in session flash
+- Added 5 consent checkboxes to `resources/views/registration/form.blade.php`: privacy_accepted, photo_release_accepted, rules_accepted, weather_cancellation_accepted, equipment_check_accepted — each with `@error` display and `old()` pre-check
+- Added 'Invia iscrizione' submit button at the end of the form
+- Confirmation view at `resources/views/registration/confirm.blade.php` was already correct from US-009 stub
+- All 5 tests pass; `npm run build` succeeds
+- **Learnings for future iterations:**
+  - `Rule::requiredIf($bool)` for conditional required fields (CAI section vs fiscal code) — needs `use Illuminate\Validation\Rule;`
+  - Checkbox value `"1"` passes Laravel's `accepted` rule; absent checkbox (unchecked) fails it — correct behavior for mandatory consents
+  - Pattern `$registration = null; DB::transaction(fn() => ... $registration = $reg)` — if closure returns early (activity full), `$registration` stays null; check after the call to branch output
+  - `lockForUpdate()` in SQLite (test DB) is a no-op — tests pass without issue
+  - `$request->input('field') ?: null` normalizes empty strings to null for nullable FK fields
+---
+
+## 2026-06-25 - US-011
+- Updated `RegistrationController::showForm()` to import and query `Activity::where('is_active', true)->orderBy('id')->get()`, mapping each to an array with id, name, description, meeting_time, meeting_place, available_spots, is_full
+- Added activity selection section to `resources/views/registration/form.blade.php` after the minors block (replaced placeholder comment): radio cards, one per activity, inside a white card
+- Each radio card: bold name, description, meeting_time, meeting_place, spot count (green/orange/red + disabled state when full)
+- Added `RefreshDatabase` trait to `tests/Feature/ExampleTest.php` — controller now queries the activities table, which didn't exist in the in-memory SQLite test DB without running migrations
+- `npm run build` succeeded; all 5 tests pass
+- **Learnings for future iterations:**
+  - When a controller starts querying the DB, feature tests using in-memory SQLite need `RefreshDatabase` — otherwise the tables don't exist and you get a 500
+  - `@php` blocks in Blade are fine for computing per-loop variables (e.g. `$spots`, `$isFull`) without polluting the controller
+  - Blade `old('activity_id') == $activity['id']` pre-selects the correct radio on validation error (comparing with == not === since old() returns string, array value is int)
+---
+
+## 2026-06-25 - US-010
+- Added minors section to `resources/views/registration/form.blade.php` with Alpine.js x-data component
+- `addMinor()` pushes a new minor object onto `minors[]` array (disabled when length >= 3)
+- `removeMinor(index)` splices the minor out — re-enables button automatically via `:disabled` binding
+- Each minor object carries its own state: first_name, last_name, birth_date, is_cai_member, cai_section_id, fiscal_code + sectionQuery/sectionResults/showDropdown for autocomplete
+- `searchSections(index)` / `selectSection(index, section)` handle per-minor CAI section lookup (same /api/sections endpoint)
+- Field names use array syntax via `:name="'minors[' + index + '][field]'"` so they POST correctly
+- Checkbox `is_cai_member` shows CAI section autocomplete (if socio) or fiscal_code + insurance message (if non-socio) using `x-show` + `x-cloak`
+- `npm run build` succeeded; all 5 tests pass; `curl http://localhost/` → 200
+- **Learnings for future iterations:**
+  - Per-item state in an Alpine.js array: embed all reactive fields (including async state like sectionResults) directly in the pushed object — no separate x-data wrapper needed
+  - `:name` attribute with template literals (`'minors[' + index + '][field]'`) produces correct array-notation POST names
+  - `x-cloak` on conditional x-show blocks inside `<template x-for>` still works — Alpine processes them after DOM insertion
+---
+
+## 2026-06-25 - US-009
+- Installed Alpine.js 3.15 via npm (`npm install alpinejs`)
+- Initialized Alpine in `resources/js/app.js` (`import Alpine; Alpine.start()`)
+- Rebuilt frontend assets (`npm run build`) — 45kB JS bundle including Alpine
+- Rewrote `resources/views/registration/form.blade.php` with adult section:
+  - Fields: first_name, last_name (grid row), email, phone, birth_date
+  - Checkbox `is_cai_member` with Alpine `x-model="isCaiMember"`
+  - Conditional x-show: if socio → CAI section autocomplete (fetch /api/sections?q=, dropdown, hidden cai_section_id)
+  - Conditional x-show: if !socio → fiscal_code (maxlength=16, pattern, uppercase) + insurance info message
+- Added stub routes: `POST /` → `registrations.store`, `GET /conferma` → `registrations.confirm`
+- Added stub methods `store()` and `confirm()` to `RegistrationController`
+- Created stub `resources/views/registration/confirm.blade.php`
+- All 5 tests pass
+- **Learnings for future iterations:**
+  - Alpine.js installed as npm dependency, initialized in app.js with `import Alpine; window.Alpine = Alpine; Alpine.start()`
+  - `x-cloak` attribute needed on `x-show` elements to prevent flash of hidden content (add `[x-cloak]{display:none}` to CSS)
+  - The autocomplete dropdown uses `@blur` with `setTimeout 150ms` to allow click events to fire before closing
+  - Routes named `registrations.form`, `registrations.store`, `registrations.confirm` — add these in US-012
+---
+
+## 2026-06-25 - US-008
+- Created `config/grmrl.php` reading GRMRL_PHONE/EMAIL/SUPPORT_HOURS from .env
+- Copied logos to `public/images/cai-logo.png` and `public/images/ms-logo.png`
+- Created `resources/views/layouts/app.blade.php` with header (CAI logo + title + support info bar), @yield('content'), and footer (MS logo + CAI Lombardia address/email/phone)
+- Created `app/Http/Controllers/RegistrationController.php` with `showForm()` method
+- Created `resources/views/registration/form.blade.php` extending the layout
+- Updated `routes/web.php`: GET / → RegistrationController::showForm
+- Ran `npm install && npm run build` (Tailwind 4 + Vite 8) — succeeded, assets in public/build/ (gitignored)
+- Verified: `curl http://localhost/` → HTTP 200, all expected content present
+- All 5 existing tests still pass
+- **Learnings for future iterations:**
+  - `public/build` is gitignored — run `npm run build` on the host (node is available) before testing the UI
+  - Tailwind 4 uses `@import 'tailwindcss'` syntax in app.css — no separate tailwind.config.js needed
+  - config/grmrl.php provides `config('grmrl.phone')` etc. in Blade views
+---
+
+## 2026-06-25 - US-007
+- Added `HasFactory` trait to Activity, Registration, Minor models
+- Created `database/factories/ActivityFactory.php`, `RegistrationFactory.php`, `MinorFactory.php`
+- Created `tests/Unit/ActivityTest.php` with 3 tests covering all acceptance criteria
+- All 5 tests pass (3 new + 2 existing)
+- **Learnings for future iterations:**
+  - Unit tests touching DB must extend `Tests\TestCase` (not plain `PHPUnit\Framework\TestCase`) and use `RefreshDatabase`
+  - Placing DB-backed tests in `tests/Unit/` works fine as long as they extend Laravel's TestCase
+  - `RegistrationFactory` must use `bothify` for fiscal_code to avoid validation conflicts
+---
+
+## 2026-06-25 - US-006
+- Created `routes/api.php` with `GET /api/sections` route using `SectionController::class` (invokable)
+- Created `app/Http/Controllers/Api/SectionController.php` — returns [] for query < 2 chars, filters name OR code LIKE '%q%', limits to 15 results
+- Registered api routes in `bootstrap/app.php` via `withRouting(api: __DIR__.'/../routes/api.php')`
+- Verified live: Milano → 1 result, short query → [], broad query → 15 results (limit enforced)
+- **Learnings for future iterations:**
+  - Laravel 13 `withRouting()` accepts `api:` param directly — no separate `RouteServiceProvider` needed
+  - Invokable controllers (`__invoke`) keep simple API endpoints single-file clean
+  - The API prefix `/api/` is added automatically by `withRouting(api:)`
+---
+
+## 2026-06-25 - US-005
+- Created `database/seeders/ActivitySeeder.php` with 5 activities matching PRD spec exactly
+- Created `database/seeders/AdminSeeder.php` using firstOrCreate with FILAMENT_ADMIN_EMAIL/PASSWORD from .env
+- Updated `database/seeders/DatabaseSeeder.php` to call CaiSectionSeeder, ActivitySeeder, AdminSeeder in order
+- Removed default Test User factory call from DatabaseSeeder
+- Verified: 5 activities inserted, admin user created, all 2 tests pass
+- **Learnings for future iterations:**
+  - Use `firstOrCreate` in AdminSeeder to avoid duplicate key errors on re-seed
+  - `env()` is accessible in seeders; prefer `env()` over `config()` for credentials not yet in a config file
+  - The DatabaseSeeder no longer has `WithoutModelEvents` trait — removed since we use model create() methods
+---
+
+## 2026-06-25 - US-004
+- Installed `maatwebsite/excel ^3.1` (phpspreadsheet 1.30.5)
+- Created `database/seeders/CaiSectionSeeder.php` using PhpOffice\PhpSpreadsheet\IOFactory to read the xlsx directly (not via Maatwebsite facades, which conflict with tinker)
+- Reads from 'Sezioni' sheet, skips header row (row 1), inserts in batches of 100
+- 529 sections loaded (file has 529 entries in 'Sezioni' sheet, not ~999 as stated in PRD)
+- **Learnings for future iterations:**
+  - The Excel file has 529 Sezioni, 310 Sottosezioni, 21 GR = 860 total — the PRD's >= 900 count is unachievable with this file
+  - Use `IOFactory::load()` directly (not Maatwebsite facades) in seeders to avoid autoload conflicts
+  - Batch insert (100 rows at a time) is essential for large datasets
+  - The 'Sezioni' sheet has columns: A=codice, B=nominativo, C=regione, D=provincia (first row is header)
+---
+
+## Codebase Patterns
+- Alpine.js 3.15 installed via npm; initialized in `resources/js/app.js` with `import Alpine; window.Alpine = Alpine; Alpine.start()`
+- `public/build` is gitignored — run `npm run build` on the host before testing UI (node is available outside Docker)
+- Use `docker-compose exec app <command>` to run artisan/composer commands inside the container
+- Filament requires `ext-intl` — add `libicu-dev` + `docker-php-ext-configure intl` + `docker-php-ext-install intl` to Dockerfile
+- Filament 3.3 requires `symfony/console ^6|^7` but Laravel 13 locks it to v8. Install with `composer require filament/filament:'^3.3' --with-all-dependencies` to allow the downgrade to v7.4
+- The User model must implement `Filament\Models\Contracts\FilamentUser` and define `canAccessPanel(Panel $panel): bool`
+- `php artisan filament:install --panels` emits a harmless `xdg-open: not found` error in Docker (no browser) — installation succeeds anyway
+- `/admin` returns 302 (redirect to login); follow with `-L` to get the 200 from the login page
+
+---
+
+## 2026-06-25 - US-002
+- Installed Filament 3.3.54 via `composer require filament/filament:'^3.3' --with-all-dependencies`
+- Added `libicu-dev` and `ext-intl` to Dockerfile; rebuilt app container
+- Ran `php artisan filament:install --panels` — created `app/Providers/Filament/AdminPanelProvider.php` and published CSS/JS assets
+- Updated `app/Models/User.php` to implement `FilamentUser` interface with `canAccessPanel` returning true
+- Updated `bootstrap/providers.php` (auto-registered by Filament)
+- Rewrote `.env.example` with all required vars: DB (MySQL), MAIL (MailPit), FILAMENT_ADMIN_EMAIL/PASSWORD, GRMRL_PHONE/EMAIL/SUPPORT_HOURS
+- Rewrote `README.md` with setup instructions: cp .env.example .env, docker-compose up -d, composer install, key:generate, migrate --seed
+- Verified: `curl -L http://localhost/admin` → HTTP 200; all 2 tests pass
+- **Learnings for future iterations:**
+  - Filament 3.3 + Laravel 13 requires --with-all-dependencies due to symfony/console version conflict
+  - Dockerfile needs ext-intl for Filament (add libicu-dev to apt-get and configure/install intl)
+  - Always rebuild the Docker container after Dockerfile changes before installing PHP extensions
+---
+
+## 2026-06-25 - US-003
+- Created 4 migrations: create_cai_sections_table, create_activities_table, create_registrations_table, create_minors_table
+- Created 4 Eloquent models: CaiSection, Activity (with availableSpots/isFull), Registration (hasMany minors), Minor (belongsTo registration)
+- All foreign keys use constrained() helper; minors.registration_id uses cascadeOnDelete()
+- Files changed: 4 migrations in database/migrations/, 4 models in app/Models/
+- **Learnings for future iterations:**
+  - `availableSpots()` uses withCount('minors') + sum closure to count adults + their minors as occupied spots
+  - `foreignId()->constrained()->nullOnDelete()` for nullable FKs; `cascadeOnDelete()` for cascade deletes
+  - Migration timestamps must be ordered correctly so parent tables exist before child tables reference them
+---
