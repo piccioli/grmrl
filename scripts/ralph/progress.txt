@@ -5,6 +5,8 @@
 - Use `Illuminate\Support\Facades\Http` for external HTTP calls (Laravel Http client is available); Pint enforces `concat_space` so use `' '` not `" "` for string concat
 - Always run `pint` (without `--test`) to auto-fix style before committing; there may be pre-existing issues in unrelated files that Pint will fix as part of the commit
 - RegistrationController maps Activity model fields to an array for the view; add new model fields there when they need to be accessible in Blade templates
+- Filament v3 `Placeholder::make()->content(fn (?Model $record) => ...)` reliably injects `$record`; use `HtmlString(view(...)->render())` to embed custom Blade components with Alpine.js inside Filament forms
+- In Blade templates, `$refs` inside Alpine.js `x-data` attributes is NOT processed by PHP (only `{{ $var }}` is); safe to use Alpine.js `this.$refs.x` in x-data strings
 
 # Ralph Progress Log
 Started: Gio 25 Giu 2026 17:02:25 CEST
@@ -31,6 +33,19 @@ Started: Gio 25 Giu 2026 17:02:25 CEST
   - The implementation was already partially present in the working tree (uncommitted changes from a prior session)
   - Pint may accumulate style issues across multiple files; always run `./vendor/bin/pint` (not `--test`) before committing to fix them all
   - RegistrationController builds an array map of Activity fields for the view — any new model field needed in Blade must be explicitly added there
+---
+
+## 2026-06-25 - US-040
+- Implemented: Leaflet map in admin activity edit page; disabled latitude/longitude TextInput fields in form (2-column Grid); Placeholder with HtmlString rendering components.leaflet-map Blade component only when coordinates are non-null; Leaflet CSS/JS loaded dynamically via Alpine.js x-init from unpkg.com CDN
+- Files changed:
+  - `resources/views/components/leaflet-map.blade.php` (new — Blade component with Alpine.js dynamic Leaflet loading)
+  - `app/Filament/Resources/ActivityResource.php` (added Grid with lat/lng TextInputs, Placeholder with map)
+- **Learnings for future iterations:**
+  - Filament v3 `Placeholder::make()->content(fn (?Activity $record) => ...)` correctly injects `$record` from the resource page
+  - Use `new HtmlString(view('components.leaflet-map', [...])->render())` to embed Blade components with Alpine.js inside Filament Placeholder content
+  - Alpine.js `x-data` and `x-init` attributes in Placeholder HtmlString are processed correctly by Alpine.js when DOM is rendered
+  - Leaflet loaded dynamically (createElement script/link) avoids @push('scripts') issues with Livewire's morphdom
+  - `->disabled()` on Filament TextInput shows value from record but prevents saving (dehydrated=false by default)
 ---
 
 ## 2026-06-25 - US-038
