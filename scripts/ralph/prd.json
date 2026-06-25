@@ -1,123 +1,133 @@
 {
   "project": "GRMRL",
-  "branchName": "ralph/iterazione-4",
-  "description": "Quarta iterazione: fix form (persistenza dati minori + sezione CAI adulto), export/stampa admin, email duplicata (client + server), recap completo nella conferma e nell'email.",
+  "branchName": "ralph/iterazione-5",
+  "description": "Quinta iterazione: luoghi di partenza cliccabili con mappa Leaflet in admin, eliminazione iscrizioni con email, script go-live e update produzione.",
   "userStories": [
     {
-      "id": "US-029",
-      "title": "Persistenza sezione CAI adulto su errore form",
-      "description": "As a user, I want the CAI section I selected to remain visible after a failed form submission so I don't have to search and select it again.",
+      "id": "US-037",
+      "title": "Aggiungere lat/lng alla tabella activities",
+      "description": "As a developer, I need to store coordinates for each activity so they can be used in map links and embedded maps.",
       "acceptanceCriteria": [
-        "Dopo un errore di validazione, il campo sezione CAI adulto mostra la sezione precedentemente selezionata (nome visibile nell'autocomplete)",
-        "L'ID della sezione è correttamente pre-valorizzato nell'input hidden cai_section_id",
-        "Il comportamento è coerente con il resto dei campi che usano old()",
-        "Typecheck/lint passa"
+        "Nuova migration che aggiunge colonne `latitude DECIMAL(10,7) nullable` e `longitude DECIMAL(10,7) nullable` alla tabella `activities`",
+        "Modello Activity aggiornato con `latitude` e `longitude` nel $fillable",
+        "La migration gira senza errori su un DB pulito",
+        "Typecheck passes"
       ],
       "priority": 1,
       "passes": true,
       "notes": ""
     },
     {
-      "id": "US-030",
-      "title": "Persistenza dati minori su errore form (inclusa sezione CAI)",
-      "description": "As a user, I want all the minor data I entered (including their CAI section) to remain after a failed form submission so I don't have to re-enter everything.",
+      "id": "US-038",
+      "title": "Geocodificare le attività via Nominatim nel seeder",
+      "description": "As a developer, I need the seeder to automatically fetch coordinates for each activity's meeting place so the data is ready for maps.",
       "acceptanceCriteria": [
-        "Dopo un errore di validazione, tutti i minori precedentemente aggiunti vengono ripristinati (nome, cognome, data di nascita, socio sì/no, codice fiscale)",
-        "Per ogni minore che era socio CAI, la sezione CAI selezionata rimane visibile nell'autocomplete",
-        "Il numero di minori mostrati corrisponde a quello precedentemente inserito",
-        "I campi condizionali (sezione / codice fiscale) si mostrano/nascondono correttamente in base al flag is_cai_member",
-        "Typecheck/lint passa"
+        "ActivitySeeder chiama https://nominatim.openstreetmap.org/search?q=...+Italia&format=json per ogni attività con header User-Agent: GRMRL/1.0",
+        "Le coordinate vengono salvate nei campi latitude e longitude",
+        "Se Nominatim non trova risultati, il seeder logga un warning e lascia null (non blocca l'esecuzione)",
+        "Pausa di almeno 1 secondo tra una chiamata e l'altra",
+        "Le coordinate trovate vengono stampate a console durante il seeding (es. Rifugio Branca → 46.5123, 10.4567)",
+        "Typecheck passes"
       ],
       "priority": 2,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
-      "id": "US-031",
-      "title": "Validazione email duplicata on blur (client-side)",
-      "description": "As a user, I want to be immediately notified when I enter an email already used for another registration so I can correct it before submitting.",
+      "id": "US-039",
+      "title": "Luogo di partenza cliccabile nelle card pubbliche",
+      "description": "As a user, I want to click the meeting place on an activity card so I can open it directly in Google Maps.",
       "acceptanceCriteria": [
-        "Nuovo endpoint GET /api/check-email?email=... restituisce JSON {exists: true/false}",
-        "Quando il focus lascia il campo email, parte una fetch verso l'endpoint",
-        "Se exists: true, compare un messaggio di errore inline sotto il campo",
-        "Se exists: false, il messaggio di errore scompare",
-        "Il submit del form è bloccato se è presente questo errore inline",
-        "Typecheck/lint passa"
+        "In activities.blade.php il testo del luogo di ritrovo diventa un <a> se latitude e longitude non sono null",
+        "Il link punta a https://www.google.com/maps?q={lat},{lng} e si apre in nuova scheda (target=_blank rel=noopener noreferrer)",
+        "Se le coordinate sono null il testo rimane non cliccabile",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
       ],
       "priority": 3,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
-      "id": "US-032",
-      "title": "Validazione email duplicata al submit (server-side)",
-      "description": "As a developer, I want the server to reject duplicate emails on form submission as a safety net.",
+      "id": "US-040",
+      "title": "Mappa Leaflet nella pagina di modifica attività (admin)",
+      "description": "As an admin, I want to see a Leaflet map showing the meeting point when editing an activity so I can verify the geocoded coordinates visually.",
       "acceptanceCriteria": [
-        "La validazione server-side nel metodo store() include la regola unique:registrations,email",
-        "In caso di email duplicata al submit, l'utente vede il messaggio di errore sul campo email",
-        "I dati del form vengono preservati (withInput) anche per questo errore",
-        "Typecheck/lint passa"
+        "La pagina /admin/activities/{id}/edit mostra una mappa Leaflet con marker nel punto geocodificato, visibile solo se latitude e longitude non sono null",
+        "La mappa usa tile OpenStreetMap (nessuna API key richiesta), caricato via CDN (unpkg.com/leaflet) in un componente Blade dedicato",
+        "Nel form admin sono presenti campi latitude e longitude in sola lettura (TextInput disabled) che mostrano i valori numerici",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
       ],
       "priority": 4,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
-      "id": "US-033",
-      "title": "Export Excel /admin/registrations/export",
-      "description": "As an admin, I want to download a complete Excel export of registrations so I can analyze data offline.",
+      "id": "US-041",
+      "title": "Eliminazione iscrizione dall'admin con conferma",
+      "description": "As an admin, I want to delete a registration with a confirmation dialog so I don't accidentally remove the wrong record.",
       "acceptanceCriteria": [
-        "GET /admin/registrations/export risponde con download di un file .xlsx (non 404)",
-        "Il file include tutte le colonne già definite in RegistrationsExport (adulto + 3 slot minori)",
-        "Il parametro opzionale ?activity_id=X filtra correttamente per attività",
-        "Il download funziona senza errori anche se non ci sono registrazioni",
-        "Typecheck/lint passa"
+        "La tabella /admin/registrations mostra l'azione Elimina per ogni riga",
+        "Cliccando Elimina appare un modal di conferma Filament con messaggio: Sei sicuro di voler eliminare l'iscrizione di {nome} {cognome}? L'operazione non è reversibile.",
+        "Confermando, l'iscrizione e i suoi minori associati vengono eliminati dal DB (hard delete, prima i minori poi l'adulto)",
+        "Dopo l'eliminazione la tabella si aggiorna automaticamente",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
       ],
       "priority": 5,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
-      "id": "US-034",
-      "title": "Stampa PDF /admin/registrations/print",
-      "description": "As an admin, I want to generate a print-ready PDF of registrations.",
+      "id": "US-042",
+      "title": "Email di notifica cancellazione all'iscritto",
+      "description": "As a registered user, I want to receive an email when my registration is deleted by an admin so I know my spot has been cancelled.",
       "acceptanceCriteria": [
-        "GET /admin/registrations/print risponde con download di un file PDF (non 404)",
-        "Il PDF contiene una tabella con: Nome, Cognome, Email, Telefono, Attività, Socio CAI, Sezione, Minori",
-        "Il parametro opzionale ?activity_id=X filtra per attività",
-        "Typecheck/lint passa"
+        "Nuova Mailable RegistrationCancellation con view emails.registration-cancellation",
+        "L'email viene inviata all'indirizzo dell'iscritto dopo la cancellazione (invio sincrono, no queue)",
+        "L'email contiene: nome dell'iscritto, nome dell'attività, invito a re-iscriversi se ci sono posti",
+        "Oggetto: Cancellazione iscrizione – Respira la Montagna – 5 luglio 2026",
+        "Stessa struttura grafica dell'email di conferma (logo CAI e logo MS inline base64)",
+        "L'email è visibile in Mailpit su http://localhost:8025 in locale",
+        "Typecheck passes"
       ],
       "priority": 6,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
-      "id": "US-035",
-      "title": "Recap completo nella pagina /conferma",
-      "description": "As a user, I want the confirmation page to show all the data I entered so I can verify everything was recorded correctly.",
+      "id": "US-043",
+      "title": "Script go-live per il primo deploy in produzione",
+      "description": "As a developer, I want a single script that automates the first deploy on the production VPS so the procedure is reproducible and documented.",
       "acceptanceCriteria": [
-        "Sezione adulto mostra: Nome, Cognome, Data di nascita (gg/mm/aaaa), Email, Telefono, Socio CAI (Sì/No), Sezione CAI (se socio) o Codice Fiscale (se non socio)",
-        "Per ogni minore: Nome, Cognome, Data di nascita (gg/mm/aaaa), Socio CAI (Sì/No), Sezione CAI (se socio) o Codice Fiscale (se non socio)",
-        "I dati vengono caricati dalla relazione $registration->load('caiSection', 'minors.caiSection')",
-        "Se una sezione non è presente (non socio), mostra 'Non socio CAI'",
-        "Typecheck/lint passa"
+        "Script scripts/deploy/golive.sh con variabili configurabili in testa: SSH_USER, SSH_HOST, SSH_PORT, DEPLOY_PATH, REPO_URL, GIT_BRANCH",
+        "Il repo contiene .env.production.example con tutte le chiavi del .env locale e valori placeholder; il commento in testa allo script spiega che l'operatore deve compilarlo e copiarlo come .env sul server prima del golive",
+        "Lo script esegue via SSH: clone del repo, verifica che .env esista (altrimenti esce con errore chiaro), docker compose -f production.compose.yml up -d --build, php artisan migrate --force, php artisan db:seed --force, php artisan optimize",
+        "Prima di ogni step critico stampa cosa sta per fare (es. → Running migrations...)",
+        "Se uno step fallisce lo script si ferma con exit 1 e stampa quale step ha fallito (set -e)",
+        "Esiste production.compose.yml (senza mailpit, senza volumi di sviluppo, con APP_ENV=production)",
+        "Typecheck passes"
       ],
       "priority": 7,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
-      "id": "US-036",
-      "title": "Recap completo nell'email di conferma",
-      "description": "As a user, I want the confirmation email to show all the data I entered so I have a complete record of my registration.",
+      "id": "US-044",
+      "title": "Script di aggiornamento produzione",
+      "description": "As a developer, I want a script to run on the production server that updates the app to the latest version so deployments are fast and consistent.",
       "acceptanceCriteria": [
-        "Sezione adulto nell'email mostra: Nome, Cognome, Data di nascita, Email, Telefono, Socio CAI (Sì/No), Sezione CAI (se socio) o Codice Fiscale (se non socio)",
-        "Per ogni minore nell'email: Nome, Cognome, Data di nascita, Socio CAI (Sì/No), Sezione CAI (se socio) o Codice Fiscale (se non socio)",
-        "Il Mailable passa il record $registration con le relazioni caricate",
-        "Typecheck/lint passa"
+        "Script scripts/deploy/update.sh con variabili configurabili in testa: DEPLOY_PATH, GIT_BRANCH, APP_CONTAINER",
+        "Lo script esegue in sequenza: git pull origin $GIT_BRANCH, docker compose -f production.compose.yml exec $APP_CONTAINER composer install --no-dev --optimize-autoloader, php artisan migrate --force, php artisan optimize, php artisan queue:restart",
+        "Ogni step è preceduto da output descrittivo",
+        "Se uno step fallisce lo script si ferma con exit 1 (set -e)",
+        "Commento in testa con istruzioni su come eseguirlo: ssh user@host 'cd /path && bash scripts/deploy/update.sh'",
+        "Lo script è idempotente: eseguirlo due volte consecutive non causa errori",
+        "Typecheck passes"
       ],
       "priority": 8,
-      "passes": true,
+      "passes": false,
       "notes": ""
     }
   ]
