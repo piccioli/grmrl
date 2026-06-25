@@ -51,8 +51,8 @@
         "Typecheck passes"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "4 migrations + 4 Eloquent models created. Activity has availableSpots() and isFull() methods included here as they are needed by the schema. All migrations ran without errors."
     },
     {
       "id": "US-004",

@@ -22,3 +22,14 @@
   - Dockerfile needs ext-intl for Filament (add libicu-dev to apt-get and configure/install intl)
   - Always rebuild the Docker container after Dockerfile changes before installing PHP extensions
 ---
+
+## 2026-06-25 - US-003
+- Created 4 migrations: create_cai_sections_table, create_activities_table, create_registrations_table, create_minors_table
+- Created 4 Eloquent models: CaiSection, Activity (with availableSpots/isFull), Registration (hasMany minors), Minor (belongsTo registration)
+- All foreign keys use constrained() helper; minors.registration_id uses cascadeOnDelete()
+- Files changed: 4 migrations in database/migrations/, 4 models in app/Models/
+- **Learnings for future iterations:**
+  - `availableSpots()` uses withCount('minors') + sum closure to count adults + their minors as occupied spots
+  - `foreignId()->constrained()->nullOnDelete()` for nullable FKs; `cascadeOnDelete()` for cascade deletes
+  - Migration timestamps must be ordered correctly so parent tables exist before child tables reference them
+---
