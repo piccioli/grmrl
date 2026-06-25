@@ -12,6 +12,7 @@ storage/framework/sessions/*
 storage/framework/views/*
 *.md
 docs/
+!docs/materiale iniziale/2026_MS_Sezioni_SottoSezioni_GR_Gruppi Regionali ETS.xlsx
 tasks/
 scripts/
 tests/

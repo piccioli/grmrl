@@ -12,7 +12,10 @@ class DatabaseSeeder extends Seeder
             CaiSectionSeeder::class,
             ActivitySeeder::class,
             AdminSeeder::class,
-            FakeRegistrationsSeeder::class,
         ]);
+
+        if (app()->environment('local', 'testing')) {
+            $this->call(FakeRegistrationsSeeder::class);
+        }
     }
 }
