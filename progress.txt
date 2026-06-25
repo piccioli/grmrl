@@ -1,3 +1,13 @@
+## 2026-06-25 - US-020
+- Updated `store()` in `RegistrationController`: changed `minors` from `['nullable','array','max:3']` to `['required','array','min:1','max:3']`
+- Added full Italian `messages` array as second argument to `$request->validate()` — covers all rules: required, email, date, size, accepted, exists, min
+- Minors error message: 'È obbligatorio aggiungere almeno un minore' (both for `required` and `min` keys)
+- All 5 tests pass
+- **Learnings for future iterations:**
+  - Pass `messages` as second arg to `$request->validate($rules, $messages)` — cleaner than using `Validator::make()`
+  - Laravel requires both `minors.required` and `minors.min` keys for the min:1 message to cover both the null/missing and the empty-array cases
+---
+
 ## 2026-06-25 - US-019
 - Updated `showForm(Activity $activity)` with route model binding; redirects to `/attivita` with flash 'Questa attività non è più disponibile' if `isFull()`; passes `$activity` model directly to view
 - Updated `store(Request $request, Activity $activity)` with route model binding; removed `activity_id` validation (now from route); uses `$activity->id` in Registration::create(); re-fetches with `lockForUpdate()` inside transaction
