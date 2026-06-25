@@ -18,7 +18,7 @@ class RegistrationConfirmation extends Mailable
 
     public function __construct(public Registration $registration)
     {
-        $registration->load(['minors', 'activity', 'caiSection']);
+        $registration->load(['minors.caiSection', 'activity', 'caiSection']);
 
         $this->caiLogoBase64 = base64_encode(file_get_contents(public_path('images/cai-logo.png')));
         $this->msLogoBase64  = base64_encode(file_get_contents(public_path('images/ms-logo.png')));
