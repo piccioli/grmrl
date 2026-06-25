@@ -1,0 +1,20 @@
+## Codebase Patterns
+- Tests must run inside Docker: `docker compose exec app php artisan test` (DB is only available inside the container)
+- Config keys in `config/grmrl.php` map from `.env` vars; always add corresponding `.env.example` entries when adding new config keys
+- Layout at `resources/views/layouts/app.blade.php` uses `config('grmrl.*')` for dynamic values in header
+
+# Ralph Progress Log
+Started: 25 Giu 2026
+---
+
+## 2026-06-25 - US-016
+- Added `GRMRL_SUPPORT_PHONE` and `GRMRL_SUPPORT_EMAIL` env vars to `.env.example`
+- Added `support_phone` (default '+39 02 555 555') and `support_email` (default 'grmrl@montagnaservizi.com') to `config/grmrl.php`
+- Updated `resources/views/layouts/app.blade.php` header to use `config('grmrl.support_phone')` and `config('grmrl.support_email')` instead of the old CAI regional contacts
+- Files changed: `config/grmrl.php`, `.env.example`, `resources/views/layouts/app.blade.php`
+- All 5 tests pass (run inside Docker)
+- **Learnings for future iterations:**
+  - Tests require Docker running; always use `docker compose exec app php artisan test`
+  - Old `grmrl.phone` and `grmrl.email` keys remain in config (used by email templates) but no longer shown in header
+  - Branch `ralph/form-flow-redesign` created from `main` for this PRD
+---
