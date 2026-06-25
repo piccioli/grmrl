@@ -6,36 +6,53 @@
     <p class="text-gray-600">5 luglio 2026 – Giornata Regionale della Montagna, Regione Lombardia</p>
 </div>
 
-<form method="POST" action="{{ route('registrations.store', $activity) }}" novalidate>
+<form
+    method="POST"
+    action="{{ route('registrations.store', $activity) }}"
+    novalidate
+    x-data="{
+        isCaiMember: {{ old('is_cai_member') ? 'true' : 'false' }},
+        sectionQuery: '{{ old('_section_name', '') }}',
+        sectionResults: [],
+        selectedSectionId: '{{ old('cai_section_id', '') }}',
+        showDropdown: false,
+        emailDuplicate: false,
+        async searchSections() {
+            if (this.sectionQuery.length < 2) {
+                this.sectionResults = [];
+                this.showDropdown = false;
+                return;
+            }
+            const res = await fetch('/api/sections?q=' + encodeURIComponent(this.sectionQuery));
+            this.sectionResults = await res.json();
+            this.showDropdown = this.sectionResults.length > 0;
+        },
+        selectSection(section) {
+            this.selectedSectionId = section.id;
+            this.sectionQuery = section.name + (section.province ? ' (' + section.province + ')' : '');
+            this.sectionResults = [];
+            this.showDropdown = false;
+        },
+        async checkEmail(value) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(value)) {
+                this.emailDuplicate = false;
+                return;
+            }
+            try {
+                const res = await fetch('/api/check-email?email=' + encodeURIComponent(value));
+                const data = await res.json();
+                this.emailDuplicate = data.exists;
+            } catch (e) {
+                this.emailDuplicate = false;
+            }
+        }
+    }"
+>
     @csrf
 
     {{-- Dati adulto --}}
-    <div
-        x-data="{
-            isCaiMember: {{ old('is_cai_member') ? 'true' : 'false' }},
-            sectionQuery: '{{ old('_section_name', '') }}',
-            sectionResults: [],
-            selectedSectionId: '{{ old('cai_section_id', '') }}',
-            showDropdown: false,
-            async searchSections() {
-                if (this.sectionQuery.length < 2) {
-                    this.sectionResults = [];
-                    this.showDropdown = false;
-                    return;
-                }
-                const res = await fetch('/api/sections?q=' + encodeURIComponent(this.sectionQuery));
-                this.sectionResults = await res.json();
-                this.showDropdown = this.sectionResults.length > 0;
-            },
-            selectSection(section) {
-                this.selectedSectionId = section.id;
-                this.sectionQuery = section.name + (section.province ? ' (' + section.province + ')' : '');
-                this.sectionResults = [];
-                this.showDropdown = false;
-            }
-        }"
-        class="space-y-6"
-    >
+    <div class="space-y-6">
         <div class="bg-white rounded-xl shadow-sm p-6 space-y-4">
             <h3 class="text-lg font-semibold text-gray-800 border-b pb-2">Dati personali</h3>
 
@@ -79,11 +96,13 @@
                     name="email"
                     value="{{ old('email') }}"
                     required
+                    @blur="checkEmail($event.target.value)"
                     class="w-full rounded-lg border-gray-300 border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 @error('email') border-red-500 @enderror"
                 >
                 @error('email')
                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                 @enderror
+                <p x-show="emailDuplicate" x-cloak class="text-red-500 text-xs mt-1">Questo indirizzo email è già stato utilizzato per un'iscrizione.</p>
             </div>
 
             <div>
@@ -514,7 +533,8 @@
     <div class="mt-6 flex justify-end">
         <button
             type="submit"
-            class="inline-flex items-center gap-2 px-8 py-3 text-base font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-colors shadow-sm"
+            :disabled="emailDuplicate"
+            class="inline-flex items-center gap-2 px-8 py-3 text-base font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
         >
             Invia iscrizione
         </button>
