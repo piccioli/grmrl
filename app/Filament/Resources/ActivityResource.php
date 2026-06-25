@@ -4,6 +4,8 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ActivityResource\Pages;
 use App\Models\Activity;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -13,6 +15,7 @@ use Filament\Tables;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\HtmlString;
 
 class ActivityResource extends Resource
 {
@@ -43,6 +46,31 @@ class ActivityResource extends Resource
                 ->numeric(),
             Toggle::make('is_active')
                 ->label('Attiva'),
+            Grid::make(2)->schema([
+                TextInput::make('latitude')
+                    ->label('Latitudine')
+                    ->disabled()
+                    ->numeric(),
+                TextInput::make('longitude')
+                    ->label('Longitudine')
+                    ->disabled()
+                    ->numeric(),
+            ]),
+            Placeholder::make('leaflet_map')
+                ->label('Posizione su mappa')
+                ->columnSpanFull()
+                ->content(function (?Activity $record) {
+                    if (! $record?->latitude || ! $record?->longitude) {
+                        return '';
+                    }
+
+                    return new HtmlString(
+                        view('components.leaflet-map', [
+                            'latitude' => $record->latitude,
+                            'longitude' => $record->longitude,
+                        ])->render()
+                    );
+                }),
         ]);
     }
 
