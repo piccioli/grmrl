@@ -93,3 +93,13 @@ Started: Gio 25 Giu 2026 17:02:25 CEST
   - golive.sh uses `set -euo pipefail` and prints descriptive step headers; stops on any failure
   - .env.production.example uses `${DB_PASSWORD}` in production.compose.yml so healthcheck and mysql env share the same value from .env
 ---
+
+## 2026-06-25 - US-044
+- Implemented: Production update script `scripts/deploy/update.sh` that runs directly on the server (or via SSH one-liner); uses `set -euo pipefail` for fail-fast behavior; executes git pull, composer install --no-dev, migrate --force, optimize, queue:restart in sequence with descriptive output; idempotent by design
+- Files changed:
+  - `scripts/deploy/update.sh` (new)
+- **Learnings for future iterations:**
+  - update.sh runs on the server itself (cd + bash), unlike golive.sh which SSHs from a dev machine — this is a common pattern for day-to-day deploys vs first-time setup
+  - `docker compose exec -T` is required for non-TTY contexts (SSH pipe, cron); omitting `-T` causes "the input device is not a TTY" error
+  - All artisan commands in update.sh are idempotent: migrate is a no-op if no new migrations, optimize clears and rebuilds cache, queue:restart signals workers gracefully
+---
