@@ -1,3 +1,12 @@
+## 2026-06-25 - US-024
+- Changed button text in `resources/views/landing.blade.php` from "Inizia" to "INIZIA" (literal uppercase, no CSS class)
+- Updated padding from `px-10 py-4` to `px-12 py-4` and font from `font-semibold` to `font-bold`
+- Added `text-xl tracking-wide shadow-md hover:shadow-lg` for improved CTA appearance
+- All 5 tests pass
+- **Learnings for future iterations:**
+  - PRD acceptance criteria explicitly require the literal text to be uppercase in HTML, not transformed via `uppercase` CSS class — match exactly
+---
+
 ## 2026-06-25 - US-022
 - Created `database/seeders/FakeRegistrationsSeeder.php`
 - Picks random activity with `Activity::inRandomOrder()->first()`; guards with error message if no activities exist
