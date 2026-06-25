@@ -2,6 +2,7 @@
 - Artisan commands must be run via `docker compose exec app php artisan ...` (DB is in Docker, not accessible from host)
 - Tests use `php artisan test` (no PHPStan, just Pint and Pest/PHPUnit)
 - Migrations use `2026_06_25_XXXXXX_` prefix; add columns with `->after()` for clean ordering
+- Use `Illuminate\Support\Facades\Http` for external HTTP calls (Laravel Http client is available); Pint enforces `concat_space` so use `' '` not `" "` for string concat
 
 # Ralph Progress Log
 Started: Gio 25 Giu 2026 17:02:25 CEST
@@ -16,4 +17,15 @@ Started: Gio 25 Giu 2026 17:02:25 CEST
   - Docker containers are running; always use `docker compose exec app` for artisan/PHP commands
   - Migration ran cleanly; all 5 tests pass
   - latitude/longitude cast as 'float' in the model
+---
+
+## 2026-06-25 - US-038
+- Implemented: Updated ActivitySeeder to geocode each activity's meeting place via Nominatim API; coordinates saved to latitude/longitude fields; warning logged if no results; 1-second pause between calls; found coordinates printed to console
+- Files changed:
+  - `database/seeders/ActivitySeeder.php` (added geocode() method using Http facade)
+- **Learnings for future iterations:**
+  - `$this->command->info()` and `$this->command->warn()` work in seeders for console output
+  - Http facade is available; use `Http::withHeaders([...])->get(url, params)` pattern
+  - Pint's `concat_space` rule: string concatenation must have spaces around `.` (e.g., `$place.' Italia'`)
+  - Geocoding runs at seeding time — seeded DB will have real coordinates from Nominatim
 ---
