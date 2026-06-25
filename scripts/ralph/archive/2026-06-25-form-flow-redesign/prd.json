@@ -1,0 +1,123 @@
+{
+  "project": "GRMRL",
+  "branchName": "ralph/form-flow-redesign",
+  "description": "Redesign del flusso di iscrizione: landing page → selezione attività → form. Gestione attività da Filament, contatti supporto MS in header, validazione in italiano, minore obbligatorio, seeder attività esaurita.",
+  "userStories": [
+    {
+      "id": "US-016",
+      "title": "Contatti di supporto Montagna Servizi in header",
+      "description": "As an admin, I want the header to show Montagna Servizi support contacts (not CAI regional) so that users contact the right support channel.",
+      "acceptanceCriteria": [
+        "Aggiungere a .env.example le variabili GRMRL_SUPPORT_PHONE e GRMRL_SUPPORT_EMAIL",
+        "Aggiornare config/grmrl.php con le chiavi support_phone (default '+39 02 555 555') e support_email (default 'grmrl@montagnaservizi.com')",
+        "Il layout resources/views/layouts/app.blade.php mostra config('grmrl.support_phone') e config('grmrl.support_email') nell'header al posto dei vecchi GRMRL_PHONE/GRMRL_EMAIL (contatti CAI regionali)",
+        "I vecchi valori GRMRL_PHONE e GRMRL_EMAIL non sono più visibili nell'header (possono restare in config ma non devono apparire nel layout)",
+        "Verify in browser using dev-browser skill",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-017",
+      "title": "Landing page con bottone Inizia",
+      "description": "As a visitor, I want to land on a welcoming page that describes the initiative so that I understand what I'm signing up for before starting.",
+      "acceptanceCriteria": [
+        "La route GET / mostra una nuova landing page (non più il form di iscrizione)",
+        "La view resources/views/welcome.blade.php (o nuova view resources/views/landing.blade.php) estende layouts.app e contiene: titolo 'Respira la Montagna – Giornata Regionale della Montagna', data e luogo dell'evento (5 luglio 2026), breve testo descrittivo dell'iniziativa, bottone 'Inizia' che porta a GET /attivita",
+        "RegistrationController::showForm (o nuovo metodo index) gestisce GET / e restituisce la landing view",
+        "Verify in browser using dev-browser skill",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-018",
+      "title": "Pagina selezione attività con card",
+      "description": "As a visitor, I want to see the 5 available activities as cards so that I can choose the one I prefer before filling in personal data.",
+      "acceptanceCriteria": [
+        "Route GET /attivita restituisce una view con le 5 card delle attività attive (is_active = true)",
+        "Ogni card mostra: nome attività (bold), luogo di ritrovo (meeting_place), orario (meeting_time), descrizione, posti disponibili rimasti calcolati con availableSpots()",
+        "Card con isFull() === true: visivamente disabilitata (grigia), non cliccabile, testo 'Esaurita'",
+        "Card disponibile: cliccabile, porta a GET /iscriviti/{activity}",
+        "Se tutte le attività sono esaurite: messaggio 'Tutte le iniziative sono al completo'",
+        "Verify in browser using dev-browser skill",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-019",
+      "title": "Routing aggiornato e form con attività pre-selezionata",
+      "description": "As a visitor, I want the form to already have the activity I chose pre-selected so that I don't have to re-choose it.",
+      "acceptanceCriteria": [
+        "Route GET /iscriviti/{activity} mostra il form di iscrizione con l'attività pre-selezionata (activity passata come parametro route model binding)",
+        "Se l'attività non esiste o isFull() === true: redirect a /attivita con messaggio flash 'Questa attività non è più disponibile'",
+        "Il form mostra il nome dell'attività in modo non modificabile (testo) e include un campo hidden activity_id con il valore dell'attività",
+        "La sezione 'Selezione attività' con le radio card è rimossa dal form (l'attività è già determinata dall'URL)",
+        "Route POST /iscriviti/{activity} gestisce il submit (sostituisce POST /)",
+        "Le route GET / e POST / del vecchio form vengono rimosse da routes/web.php",
+        "Verify in browser using dev-browser skill",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-020",
+      "title": "Validazione form in italiano e minore obbligatorio",
+      "description": "As a visitor, I want validation messages in Italian and the form must require at least one minor.",
+      "acceptanceCriteria": [
+        "RegistrationController::store: tutti i messaggi di validazione sono in italiano (array 'messages' passato al Validator o validate())",
+        "La regola 'minors' richiede almeno un elemento: 'minors' => 'required|array|min:1' con messaggio 'È obbligatorio aggiungere almeno un minore'",
+        "Nessun messaggio di errore in inglese visibile all'utente finale nel form",
+        "I messaggi di errore esistenti nel Blade (loop su $errors) continuano a funzionare",
+        "Verify in browser using dev-browser skill",
+        "Typecheck passes"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-021",
+      "title": "ActivityResource in Filament",
+      "description": "As an admin, I want to manage activities from the Filament panel so that I can update descriptions, times, and capacity without touching the code.",
+      "acceptanceCriteria": [
+        "Esiste app/Filament/Resources/ActivityResource.php con pagine List e Edit",
+        "Tabella lista mostra colonne: Nome (name), Luogo (meeting_place), Orario (meeting_time), Capienza (max_capacity), Posti rimasti (calcolati con availableSpots()), Stato (is_active toggle)",
+        "Form di modifica espone i campi: name (TextInput required), description (Textarea), meeting_time (TextInput), meeting_place (TextInput), max_capacity (TextInput numeric), is_active (Toggle)",
+        "Azione Edit disponibile su ogni riga; nessuna azione Delete",
+        "Verify in browser using dev-browser skill",
+        "Typecheck passes"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-022",
+      "title": "FakeRegistrationsSeeder – attività random esaurita",
+      "description": "As a developer, I want a seeder that fills a random activity to 50 participants so that I can test the sold-out UI without manual data entry.",
+      "acceptanceCriteria": [
+        "Esiste database/seeders/FakeRegistrationsSeeder.php",
+        "Il seeder sceglie casualmente una delle 5 attività con Activity::inRandomOrder()->first()",
+        "Crea iscrizioni fake (Registration + 1 Minor ciascuna) in loop finché availableSpots() <= 0 (ogni iscrizione occupa 2 posti: 1 adulto + 1 minore)",
+        "I dati fake sono plausibili: nome/cognome casuali, email valida, cai_section_id da una sezione esistente, fiscal_code di 16 caratteri, tutti i checkbox = true",
+        "Dopo l'esecuzione l'attività scelta ha isFull() === true",
+        "Il seeder è invocabile standalone: php artisan db:seed --class=FakeRegistrationsSeeder",
+        "Il seeder NON è aggiunto a DatabaseSeeder (solo uso manuale)",
+        "Typecheck passes"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": ""
+    }
+  ]
+}

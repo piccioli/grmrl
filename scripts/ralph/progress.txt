@@ -2,19 +2,16 @@
 - Tests must run inside Docker: `docker compose exec app php artisan test` (DB is only available inside the container)
 - Config keys in `config/grmrl.php` map from `.env` vars; always add corresponding `.env.example` entries when adding new config keys
 - Layout at `resources/views/layouts/app.blade.php` uses `config('grmrl.*')` for dynamic values in header
+- `config('grmrl.support_phone')` e `config('grmrl.support_email')` sono i contatti di supporto usati in header e footer; `config('grmrl.phone')` e `config('grmrl.email')` sono i contatti CAI usati nelle email transazionali
 
 # Ralph Progress Log
 Started: 25 Giu 2026
 ---
 
-## 2026-06-25 - US-016
-- Added `GRMRL_SUPPORT_PHONE` and `GRMRL_SUPPORT_EMAIL` env vars to `.env.example`
-- Added `support_phone` (default '+39 02 555 555') and `support_email` (default 'grmrl@montagnaservizi.com') to `config/grmrl.php`
-- Updated `resources/views/layouts/app.blade.php` header to use `config('grmrl.support_phone')` and `config('grmrl.support_email')` instead of the old CAI regional contacts
-- Files changed: `config/grmrl.php`, `.env.example`, `resources/views/layouts/app.blade.php`
-- All 5 tests pass (run inside Docker)
+## 2026-06-25 - US-023
+- Sostituita l'occorrenza di 'Club Alpino Italiano – Sezione Lombardia' con 'Club Alpino Italiano – Gruppo Regionale Lombardia' in resources/views/landing.blade.php
+- Files changed: resources/views/landing.blade.php
 - **Learnings for future iterations:**
-  - Tests require Docker running; always use `docker compose exec app php artisan test`
-  - Old `grmrl.phone` and `grmrl.email` keys remain in config (used by email templates) but no longer shown in header
-  - Branch `ralph/form-flow-redesign` created from `main` for this PRD
+  - L'unica occorrenza del nome vecchio era in landing.blade.php riga 19
+  - Grep con `--exclude-dir=vendor --exclude-dir=storage` è sufficiente per cercare nel codebase applicativo
 ---

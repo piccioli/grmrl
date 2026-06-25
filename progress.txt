@@ -1,3 +1,56 @@
+## 2026-06-25 - US-028
+- Updated `RegistrationController::store()`: added `->with('registration_id', $registration->id)` to the redirect
+- Updated `RegistrationController::confirm()`: reads `registration_id` from session, loads Registration with `activity`, `minors`, `minors.caiSection`, `caiSection` relations via eager loading; passes `$registration` (or `null`) to the view
+- Rewrote `resources/views/registration/confirm.blade.php`:
+  - Always shows green success banner with email
+  - If `$registration` is set: shows adult data (name, surname, email, phone, CAI section or 'Non socio CAI'), activity box (name, meeting_time, meeting_place), minors list (name, surname, birth_date formatted d/m/Y, CAI section or 'Non socio CAI')
+  - If `$registration` is null (session expired/direct access): only the success banner shows
+- All 5 tests pass
+- **Learnings for future iterations:**
+  - `->with('registration_id', $registration->id)` on redirect puts the value in the flash session; `session('registration_id')` reads it on the next request
+  - Use `Registration::with(['activity', 'minors', 'minors.caiSection', 'caiSection'])->find($id)` — dot-notation for nested relations in a single with() call works perfectly
+  - `$minor->birth_date->format('d/m/Y')` — works because `birth_date` is cast to `date` in the Minor model (returns a Carbon instance)
+  - `$model->relation?->name ?? 'Non socio CAI'` — nullsafe operator handles both null relation and no-section cases cleanly
+---
+
+## 2026-06-25 - US-027
+- Added `Rule::forEach()` validation rule for `minors.*.cai_section_id` in `RegistrationController::store()`: required when the sibling `is_cai_member` field is truthy, plus `exists:cai_sections,id`
+- Used `explode('.', $attribute)[1]` inside the forEach closure to extract the array index and look up `$data['minors'][$index]['is_cai_member']`
+- Added Italian messages: 'La sezione CAI del minore è obbligatoria per i soci.' and 'La sezione CAI del minore selezionata non è valida.'
+- Added a PHP block in `registration/form.blade.php` that collects and displays any `minors.\d+.*` errors as a summary list inside the minors card (since individual fields are Alpine-rendered and can't use @error inline)
+- All 5 tests pass
+- **Learnings for future iterations:**
+  - `Rule::forEach(fn($value, $attribute, $data) => [...])` is the right approach for conditional rules on wildcard array fields — `required_if:minors.*.field,val` does NOT work across same-level wildcards
+  - Extract the array index from the attribute path with `explode('.', $attribute)[1]` to cross-reference sibling fields
+  - For Alpine.js-rendered form fields, server errors can't be shown inline via @error; use a summary block that scans `$errors->toArray()` for keys matching a regex pattern
+---
+
+## 2026-06-25 - US-026
+- Added `@error('minors') ... @enderror` block inside the "Minori accompagnati" card in `resources/views/registration/form.blade.php`
+- Message text: 'È obbligatorio aggiungere almeno un minore.' displayed as red text
+- Added `@error('minors') border border-red-400 bg-red-50 @enderror` to the card's class to show a red border+background visual error state
+- All 5 tests pass
+- **Learnings for future iterations:**
+  - `@error('fieldName')` in Blade classes works inside class attributes — generates no output when no error exists, outputs the class string when there's an error; safe to use inline in class=""
+---
+
+## 2026-06-25 - US-025
+- Replaced hardcoded `gr_cai_lombardia@cai.it` and `+393274851177` in the footer of `resources/views/layouts/app.blade.php` with `config('grmrl.support_email')` and `config('grmrl.support_phone')`
+- Footer now uses the same config keys as the header support bar, ensuring consistency
+- All 5 tests pass
+- **Learnings for future iterations:**
+  - `config/grmrl.php` has two sets of contacts: `phone`/`email` (organizational) and `support_phone`/`support_email` (user-facing support); use `support_*` keys for user-visible contact info
+---
+
+## 2026-06-25 - US-024
+- Changed button text in `resources/views/landing.blade.php` from "Inizia" to "INIZIA" (literal uppercase, no CSS class)
+- Updated padding from `px-10 py-4` to `px-12 py-4` and font from `font-semibold` to `font-bold`
+- Added `text-xl tracking-wide shadow-md hover:shadow-lg` for improved CTA appearance
+- All 5 tests pass
+- **Learnings for future iterations:**
+  - PRD acceptance criteria explicitly require the literal text to be uppercase in HTML, not transformed via `uppercase` CSS class — match exactly
+---
+
 ## 2026-06-25 - US-022
 - Created `database/seeders/FakeRegistrationsSeeder.php`
 - Picks random activity with `Activity::inRandomOrder()->first()`; guards with error message if no activities exist

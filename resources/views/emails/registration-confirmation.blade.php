@@ -86,8 +86,8 @@
 
         {{-- Support info --}}
         <div class="support">
-            Per informazioni: <a href="mailto:{{ config('grmrl.email') }}">{{ config('grmrl.email') }}</a>
-            – Tel. <strong>{{ config('grmrl.phone') }}</strong>
+            Per informazioni: <a href="mailto:{{ config('grmrl.support_email') }}">{{ config('grmrl.support_email') }}</a>
+            – Tel. <strong>{{ config('grmrl.support_phone') }}</strong>
             ({{ config('grmrl.support_hours') }})
         </div>
     </div>
@@ -95,8 +95,8 @@
     {{-- Footer --}}
     <div class="footer">
         <div><img src="data:image/png;base64,{{ $msLogoBase64 }}" alt="Logo Montagna Servizi"></div>
-        <div>Realizzato da Montagna Servizi</div>
-        <div style="margin-top:6px;">CAI Lombardia – Via Petrella 19, Milano | gr_cai_lombardia@cai.it | Tel. +393274851177</div>
+        <div>Realizzato da Montagna Servizi SCPA</div>
+        <div style="margin-top:6px;">Sede legale: Via Errico Petrella 19, 20124 Milano (MI) | P.IVA 11790660960 | SDI: M5UXCR1</div>
     </div>
 </div>
 </body>

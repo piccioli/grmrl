@@ -69,6 +69,15 @@ class RegistrationController extends Controller
             'minors.*.first_name'           => ['required', 'string', 'max:255'],
             'minors.*.last_name'            => ['required', 'string', 'max:255'],
             'minors.*.birth_date'           => ['required', 'date'],
+            'minors.*.cai_section_id'       => Rule::forEach(function (mixed $value, string $attribute, array $data): array {
+                $index = explode('.', $attribute)[1];
+                $isCaiMember = ! empty($data['minors'][$index]['is_cai_member']);
+                return [
+                    Rule::requiredIf($isCaiMember),
+                    'nullable',
+                    'exists:cai_sections,id',
+                ];
+            }),
         ], [
             'first_name.required'                    => 'Il nome è obbligatorio.',
             'last_name.required'                     => 'Il cognome è obbligatorio.',
@@ -92,6 +101,8 @@ class RegistrationController extends Controller
             'minors.*.last_name.required'            => 'Il cognome del minore è obbligatorio.',
             'minors.*.birth_date.required'           => 'La data di nascita del minore è obbligatoria.',
             'minors.*.birth_date.date'               => 'La data di nascita del minore non è valida.',
+            'minors.*.cai_section_id.required'       => 'La sezione CAI del minore è obbligatoria per i soci.',
+            'minors.*.cai_section_id.exists'         => 'La sezione CAI del minore selezionata non è valida.',
         ]);
 
         $registration = null;
@@ -142,11 +153,24 @@ class RegistrationController extends Controller
 
         Mail::to($registration->email)->send(new RegistrationConfirmation($registration));
 
-        return redirect()->route('registrations.confirm')->with('email', $registration->email);
+        return redirect()->route('registrations.confirm')
+            ->with('email', $registration->email)
+            ->with('registration_id', $registration->id);
     }
 
     public function confirm(): View
     {
-        return view('registration.confirm');
+        $registration = null;
+
+        if ($id = session('registration_id')) {
+            $registration = Registration::with([
+                'activity',
+                'minors',
+                'minors.caiSection',
+                'caiSection',
+            ])->find($id);
+        }
+
+        return view('registration.confirm', compact('registration'));
     }
 }
