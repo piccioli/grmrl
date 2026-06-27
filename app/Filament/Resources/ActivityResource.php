@@ -6,10 +6,12 @@ use App\Filament\Resources\ActivityResource\Pages;
 use App\Models\Activity;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\IconColumn;
@@ -30,61 +32,99 @@ class ActivityResource extends Resource
     public static function form(Form $form): Form
     {
         return $form->schema([
-            TextInput::make('name')
-                ->label('Nome')
-                ->required()
-                ->maxLength(255),
-            Textarea::make('description')
-                ->label('Descrizione')
-                ->rows(3),
-            TextInput::make('meeting_time')
-                ->label('Orario'),
-            TextInput::make('meeting_place')
-                ->label('Luogo di ritrovo'),
-            TextInput::make('max_capacity')
-                ->label('Capienza massima')
-                ->numeric(),
-            Toggle::make('is_active')
-                ->label('Attiva'),
-            Grid::make(2)->schema([
-                TextInput::make('latitude')
-                    ->label('Latitudine')
-                    ->disabled()
-                    ->numeric(),
-                TextInput::make('longitude')
-                    ->label('Longitudine')
-                    ->disabled()
-                    ->numeric(),
-            ]),
-            TextInput::make('difficulty')
-                ->label('Difficoltà'),
-            TextInput::make('elevation_gain')
-                ->label('Dislivello'),
-            TextInput::make('trail_length')
-                ->label('Lunghezza/Durata'),
-            TextInput::make('water_description')
-                ->label('Acqua'),
-            Textarea::make('itinerary_description')
-                ->label('Descrizione itinerario')
-                ->rows(4),
-            TextInput::make('image_url')
-                ->label('URL immagine')
-                ->url(),
-            Placeholder::make('leaflet_map')
-                ->label('Posizione su mappa')
+            Tabs::make('Attività')
                 ->columnSpanFull()
-                ->content(function (?Activity $record) {
-                    if (! $record?->latitude || ! $record?->longitude) {
-                        return '';
-                    }
+                ->tabs([
 
-                    return new HtmlString(
-                        view('components.leaflet-map', [
-                            'latitude' => $record->latitude,
-                            'longitude' => $record->longitude,
-                        ])->render()
-                    );
-                }),
+                    Tabs\Tab::make('Principale')->schema([
+                        TextInput::make('name')
+                            ->label('Nome')
+                            ->required()
+                            ->maxLength(255)
+                            ->columnSpanFull(),
+                        TextInput::make('meeting_time')
+                            ->label('Orario'),
+                        TextInput::make('meeting_place')
+                            ->label('Luogo di ritrovo')
+                            ->columnSpanFull(),
+                        TextInput::make('max_capacity')
+                            ->label('Capienza massima')
+                            ->numeric(),
+                        Toggle::make('is_active')
+                            ->label('Attiva'),
+                    ])->columns(2),
+
+                    Tabs\Tab::make('Descrizione')->schema([
+                        Textarea::make('description')
+                            ->label('Descrizione')
+                            ->rows(3)
+                            ->columnSpanFull(),
+                        Textarea::make('detailed_description')
+                            ->label('Descrizione dettagliata')
+                            ->rows(5)
+                            ->columnSpanFull(),
+                        Textarea::make('itinerary_description')
+                            ->label('Descrizione itinerario')
+                            ->rows(4)
+                            ->columnSpanFull(),
+                        TextInput::make('image_url')
+                            ->label('URL immagine')
+                            ->url()
+                            ->live(onBlur: true)
+                            ->columnSpanFull(),
+                        Placeholder::make('image_preview')
+                            ->label('Anteprima immagine')
+                            ->columnSpanFull()
+                            ->content(function (Get $get) {
+                                $url = $get('image_url');
+                                if (! $url) {
+                                    return new HtmlString('<span class="text-sm text-gray-400 italic">Inserisci un URL per vedere l\'anteprima</span>');
+                                }
+
+                                return new HtmlString(
+                                    '<img src="' . e($url) . '" alt="Anteprima" style="max-width:100%;max-height:340px;border-radius:8px;object-fit:cover;box-shadow:0 2px 8px rgba(0,0,0,0.12);">'
+                                );
+                            }),
+                    ]),
+
+                    Tabs\Tab::make('Dati tecnici')->schema([
+                        TextInput::make('difficulty')
+                            ->label('Difficoltà'),
+                        TextInput::make('elevation_gain')
+                            ->label('Dislivello'),
+                        TextInput::make('trail_length')
+                            ->label('Lunghezza / Durata'),
+                        TextInput::make('water_description')
+                            ->label('Acqua'),
+                    ])->columns(2),
+
+                    Tabs\Tab::make('Mappa')->schema([
+                        Placeholder::make('interactive_map')
+                            ->label('Posizione sulla mappa')
+                            ->columnSpanFull()
+                            ->content(function (?Activity $record) {
+                                return new HtmlString(
+                                    view('filament.activity-interactive-map', [
+                                        'lat' => $record?->latitude ?? 45.4654,
+                                        'lng' => $record?->longitude ?? 9.1859,
+                                        'zoom' => ($record?->latitude && $record?->longitude) ? 13 : 6,
+                                    ])->render()
+                                );
+                            }),
+
+                        Grid::make(2)->schema([
+                            TextInput::make('latitude')
+                                ->label('Latitudine')
+                                ->numeric()
+                                ->step(0.000001),
+                            TextInput::make('longitude')
+                                ->label('Longitudine')
+                                ->numeric()
+                                ->step(0.000001),
+                        ]),
+                    ]),
+
+                ]),
         ]);
     }
 

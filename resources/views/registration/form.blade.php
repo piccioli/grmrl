@@ -6,10 +6,6 @@
     <p class="text-gray-600">5 luglio 2026 – Giornata Regionale della Montagna, Regione Lombardia</p>
 </div>
 
-<div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
-    Prima di procedere con l'iscrizione, ti consigliamo di leggere <a href="https://organizzazione.cai.it/gr-lombardia/progetti-regione-lom/progetto/" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline hover:text-blue-800">la presentazione del progetto</a>.
-</div>
-
 <form
     method="POST"
     action="{{ route('registrations.store', $activity) }}"

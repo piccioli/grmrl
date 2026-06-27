@@ -29,6 +29,7 @@ class RegistrationController extends Controller
                 'id' => $a->id,
                 'name' => $a->name,
                 'description' => $a->description,
+                'detailed_description' => $a->detailed_description,
                 'meeting_time' => $a->meeting_time,
                 'meeting_place' => $a->meeting_place,
                 'latitude' => $a->latitude,
@@ -38,6 +39,7 @@ class RegistrationController extends Controller
                 'trail_length' => $a->trail_length,
                 'water_description' => $a->water_description,
                 'itinerary_description' => $a->itinerary_description,
+                'image_url' => $a->image_url,
                 'available_spots' => $a->availableSpots(),
                 'is_full' => $a->isFull(),
             ]);

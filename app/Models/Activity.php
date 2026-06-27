@@ -10,7 +10,7 @@ class Activity extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'description', 'meeting_time', 'meeting_place', 'max_capacity', 'is_active', 'latitude', 'longitude', 'difficulty', 'elevation_gain', 'trail_length', 'water_description', 'itinerary_description', 'image_url'];
+    protected $fillable = ['name', 'description', 'detailed_description', 'meeting_time', 'meeting_place', 'max_capacity', 'is_active', 'latitude', 'longitude', 'difficulty', 'elevation_gain', 'trail_length', 'water_description', 'itinerary_description', 'image_url'];
 
     protected $casts = [
         'is_active' => 'boolean',
