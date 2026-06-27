@@ -24,3 +24,13 @@
   - La validazione `minors.*.field` rimane intatta: se si aggiunge un minore, i suoi campi restano obbligatori
   - Il messaggio di testo statico nella view era duplicato rispetto ai messaggi di validazione Laravel (rimozione pulita)
 ---
+
+## 2026-06-27 - US-046
+- Sostituito il testo del consenso `rules_accepted` in `resources/views/registration/form.blade.php`
+- "Ho letto la locandina" → "Ho consultato le <a ...>informazioni sull'attività</a>" con link a https://organizzazione.cai.it/gr-lombardia/progetti-regione-lom/attivita/
+- Link con `target="_blank" rel="noopener noreferrer"` e stile `text-blue-600 underline hover:text-blue-800`
+- L'asterisco obbligatorio rimane invariato
+- **Learnings for future iterations:**
+  - Modifica puntuale in `form.blade.php` attorno alla riga 478 (sezione consenso rules_accepted)
+  - Nessun cambio PHP richiesto: solo Blade template
+---

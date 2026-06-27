@@ -32,7 +32,7 @@
         "Verify in browser using dev-browser skill: il link è cliccabile e visibile nel consenso"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
