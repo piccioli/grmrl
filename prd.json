@@ -87,7 +87,7 @@
         "Typecheck passes"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "Dipende da US-048 (i campi devono esistere prima di poterli popolare). Dati completi nella tabella del PRD tasks/prd-iterazione-6.md."
     },
     {

@@ -57,3 +57,16 @@
   - `image_url` non incluso nel mapping del controller perché non usato nella view pubblica (solo admin Filament)
   - Il seeder US-049 dipende da questa migration — deve girare dopo
 ---
+
+## 2026-06-27 - US-049
+- Aggiornato `ActivitySeeder.php` con dati reali del sito CAI per tutte e 5 le attività
+- Aggiunti `DB::statement('SET FOREIGN_KEY_CHECKS=0')` + `Activity::truncate()` per garantire idempotenza del seeder
+- Rifugio Carlo Porta: `meeting_time` corretto a `'8:45'` (era `'9:00'`), `meeting_place` aggiornato a `'Parcheggio via Piani dei Resinelli (a pagamento)'`
+- Rifugio Branca: `meeting_place` aggiornato, tutti e 6 i nuovi campi valorizzati
+- Tutti i campi `itinerary_description` valorizzati con testo descrittivo; `image_url` rimane `null` per tutte
+- Seeder completato senza errori; alcuni luoghi Nominatim non trovati (risultato vuoto gestito gracefully)
+- **Learnings for future iterations:**
+  - Aggiunto `import Illuminate\Support\Facades\DB` per le statement FK
+  - Nominatim restituisce risultati vuoti per stringhe molto specifiche (es. "Parcheggio Diga di San Giacomo...") — il seeder gestisce il warning e procede
+  - Il seeder ora è idempotente: può essere eseguito più volte senza duplicati
+---
