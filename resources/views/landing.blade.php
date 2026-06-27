@@ -29,6 +29,10 @@
     </p>
 </div>
 
+<div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 text-sm text-blue-800">
+    Se non lo hai ancora fatto leggi <a href="https://organizzazione.cai.it/gr-lombardia/progetti-regione-lom/progetto/" target="_blank" rel="noopener noreferrer" class="font-semibold underline hover:text-blue-900">la presentazione del progetto</a>.
+</div>
+
 <div class="text-center">
     <a href="{{ route('activities') }}"
        class="inline-block bg-blue-700 hover:bg-blue-800 text-white font-semibold px-6 py-3 rounded-lg transition-colors">

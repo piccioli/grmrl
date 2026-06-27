@@ -251,7 +251,7 @@
         }"
         class="mt-6 space-y-4"
     >
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 @error('minors') border-red-400 bg-red-50 @enderror">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-semibold text-gray-800">Minori accompagnati</h3>
                 <button
@@ -266,10 +266,6 @@
                     Aggiungi minore
                 </button>
             </div>
-
-            @error('minors')
-                <p class="text-red-600 text-sm font-medium mb-3">È obbligatorio aggiungere almeno un minore.</p>
-            @enderror
 
             @php
                 $minorFieldErrors = collect($errors->toArray())->filter(fn($v, $k) => preg_match('/^minors\.\d+\./', $k));
@@ -479,7 +475,7 @@
                     class="mt-0.5 w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 shrink-0"
                 >
                 <span class="text-sm text-gray-700">
-                    Ho letto la locandina, compreso l'itinerario, il dislivello e la durata. Dichiaro che l'escursione è alla mia portata. <span class="text-red-500">*</span>
+                    Ho consultato le <a href="https://organizzazione.cai.it/gr-lombardia/progetti-regione-lom/attivita/" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline hover:text-blue-800">informazioni sull'attività</a>, compreso l'itinerario, il dislivello e la durata. Dichiaro che l'escursione è alla mia portata. <span class="text-red-500">*</span>
                 </span>
             </label>
             @error('rules_accepted')
