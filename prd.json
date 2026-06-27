@@ -120,7 +120,7 @@
         "Il PDF aggiornato è salvato in docs/volantino/ (sovrascrittura o nuovo file con suffisso -v2)"
       ],
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "notes": "La locandina è un Artifact HTML Claude, non un file nel repository. Richiede sessione interattiva con Claude per aggiornare l'Artifact HTML e ri-esportare in PDF."
     }
   ]

@@ -83,3 +83,15 @@
   - `x-cloak` richiede la regola CSS `[x-cloak] { display: none; }` nel layout — verificare che sia presente
   - Il click-outside si gestisce con `@click.self` sull'overlay, non serve Alpine click-outside plugin
 ---
+
+## 2026-06-27 - US-051
+- Creato `docs/volantino/volantino-grmrl-2026-v2.html` — HTML A4 stampabile con tutti i dati aggiornati
+- Rifugio Branca: aggiunti Difficoltà E – Escursionistico, Dislivello 343 m, Percorso 3 km – 3 ore
+- Orario Rifugio Carlo Porta: 8:45 (corretto rispetto al precedente 9:00)
+- Sezione "Cosa portare": aggiunto Pranzo al sacco
+- PDF generato con Chrome headless: `docs/volantino/volantino-grmrl-2026-v2.pdf` (241 KB)
+- **Learnings for future iterations:**
+  - L'Artifact HTML originale non è un file nel repo — per la prossima versione creare subito un `.html` source versionato
+  - Chrome headless genera PDF con `--headless --print-to-pdf --print-to-pdf-no-header "file:///path/to/file.html"` senza dipendenze extra
+  - Il QR code nel flyer è un placeholder visivo — per la versione finale generare il QR con la URL di iscrizione
+---
