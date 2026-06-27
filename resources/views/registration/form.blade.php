@@ -475,7 +475,7 @@
                     class="mt-0.5 w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 shrink-0"
                 >
                 <span class="text-sm text-gray-700">
-                    Ho letto la locandina, compreso l'itinerario, il dislivello e la durata. Dichiaro che l'escursione è alla mia portata. <span class="text-red-500">*</span>
+                    Ho consultato le <a href="https://organizzazione.cai.it/gr-lombardia/progetti-regione-lom/attivita/" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline hover:text-blue-800">informazioni sull'attività</a>, compreso l'itinerario, il dislivello e la durata. Dichiaro che l'escursione è alla mia portata. <span class="text-red-500">*</span>
                 </span>
             </label>
             @error('rules_accepted')
