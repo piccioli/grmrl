@@ -47,7 +47,7 @@
         "Verify in browser using dev-browser skill: il banner appare nella pagina form, il link funziona"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {

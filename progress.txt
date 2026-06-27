@@ -34,3 +34,14 @@
   - Modifica puntuale in `form.blade.php` attorno alla riga 478 (sezione consenso rules_accepted)
   - Nessun cambio PHP richiesto: solo Blade template
 ---
+
+## 2026-06-27 - US-047
+- Aggiunto banner informativo in `resources/views/registration/form.blade.php` prima del tag `<form>`
+- Banner con classe `bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6` inserito tra l'header e il form
+- Testo: "Prima di procedere con l'iscrizione, ti consigliamo di leggere la presentazione del progetto" con link a https://organizzazione.cai.it/gr-lombardia/progetti-regione-lom/progetto/
+- Link con `target="_blank" rel="noopener noreferrer"` e stile `text-blue-600 underline hover:text-blue-800`
+- Template compilato e verificato con `php artisan view:cache`
+- **Learnings for future iterations:**
+  - Il banner è inserito tra la riga 7 (chiusura div header) e la riga 9 (apertura form) del template
+  - Solo modifica Blade, nessun cambio PHP/controller necessario
+---
