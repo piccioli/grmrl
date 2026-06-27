@@ -56,6 +56,20 @@ class ActivityResource extends Resource
                     ->disabled()
                     ->numeric(),
             ]),
+            TextInput::make('difficulty')
+                ->label('Difficoltà'),
+            TextInput::make('elevation_gain')
+                ->label('Dislivello'),
+            TextInput::make('trail_length')
+                ->label('Lunghezza/Durata'),
+            TextInput::make('water_description')
+                ->label('Acqua'),
+            Textarea::make('itinerary_description')
+                ->label('Descrizione itinerario')
+                ->rows(4),
+            TextInput::make('image_url')
+                ->label('URL immagine')
+                ->url(),
             Placeholder::make('leaflet_map')
                 ->label('Posizione su mappa')
                 ->columnSpanFull()

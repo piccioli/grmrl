@@ -33,6 +33,11 @@ class RegistrationController extends Controller
                 'meeting_place' => $a->meeting_place,
                 'latitude' => $a->latitude,
                 'longitude' => $a->longitude,
+                'difficulty' => $a->difficulty,
+                'elevation_gain' => $a->elevation_gain,
+                'trail_length' => $a->trail_length,
+                'water_description' => $a->water_description,
+                'itinerary_description' => $a->itinerary_description,
                 'available_spots' => $a->availableSpots(),
                 'is_full' => $a->isFull(),
             ]);
