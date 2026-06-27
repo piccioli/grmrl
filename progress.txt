@@ -70,3 +70,16 @@
   - Nominatim restituisce risultati vuoti per stringhe molto specifiche (es. "Parcheggio Diga di San Giacomo...") — il seeder gestisce il warning e procede
   - Il seeder ora è idempotente: può essere eseguito più volte senza duplicati
 ---
+
+## 2026-06-27 - US-050
+- Aggiornato `resources/views/activities.blade.php` con bottone INFO e modale Alpine.js
+- Wrapper `<div class="grid gap-4">` dotato di `x-data="{ openModal: null }"` per gestire stato modale
+- Bottone INFO (`border border-blue-600 text-blue-700 hover:bg-blue-50`) in `flex flex-col gap-2 items-end` accanto a Scegli/Esaurita
+- Modale per ogni attività: overlay fixed con `@click.self="openModal = null"`, pannello con × chiusura, DL con campi non-null, link CAI
+- Solo i campi valorizzati (difficulty, elevation_gain, trail_length, water_description, itinerary_description) vengono mostrati con `@if`
+- I campi nel controller erano già presenti da US-048; template compilato senza errori
+- **Learnings for future iterations:**
+  - Il pattern `x-data` sul wrapper grid + `x-show="openModal === id"` sulla modale in-loop funziona bene con Alpine.js
+  - `x-cloak` richiede la regola CSS `[x-cloak] { display: none; }` nel layout — verificare che sia presente
+  - Il click-outside si gestisce con `@click.self` sull'overlay, non serve Alpine click-outside plugin
+---
