@@ -1,0 +1,138 @@
+{
+  "project": "GRMRL",
+  "branchName": "ralph/iterazione-4",
+  "description": "Quarta iterazione: validazione email duplicata, persistenza dati form su errore, export Excel e stampa PDF admin, recap completo su pagina conferma ed email.",
+  "userStories": [
+    {
+      "id": "US-032",
+      "title": "Validazione email duplicata al submit (server-side)",
+      "description": "As a developer, I want the server to reject duplicate emails on form submission so that no two registrations share the same email address.",
+      "acceptanceCriteria": [
+        "In RegistrationController::store() aggiungere la regola 'unique:registrations,email' nel campo email",
+        "Il messaggio di errore in italiano è: 'Questo indirizzo email è già stato utilizzato per un\\'iscrizione. Ogni partecipante deve usare un\\'email univoca.'",
+        "In caso di errore, il form torna con withInput() preservando tutti i dati già inseriti",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-031",
+      "title": "Validazione email duplicata on blur (client-side)",
+      "description": "As a user, I want to be immediately notified when I enter an already-used email so I can correct it before submitting.",
+      "acceptanceCriteria": [
+        "Nuovo endpoint GET /api/check-email?email=... registrato in routes/api.php, risponde JSON {\"exists\": bool}",
+        "L'endpoint è protetto da throttle middleware: 10 richieste al minuto per IP",
+        "Nel form, quando il focus lascia il campo email (evento blur), parte una fetch verso /api/check-email solo se il valore è una email valida (regex base)",
+        "Se exists=true, compare sotto il campo email il messaggio: 'Questo indirizzo email è già stato utilizzato per un\\'iscrizione.'",
+        "Se exists=false, il messaggio di errore scompare",
+        "Il submit del form è bloccato (button disabled o preventDefault) se l'errore di email duplicata è visibile",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-033",
+      "title": "Export Excel /admin/registrations/export",
+      "description": "As an admin, I want to download a complete Excel export of registrations so I can analyze data offline.",
+      "acceptanceCriteria": [
+        "GET /admin/registrations/export risponde con download di file .xlsx (non 404 né 500)",
+        "Il package maatwebsite/excel è installato via composer se non già presente",
+        "Il file scaricato si chiama 'iscrizioni-YYYY-MM-DD.xlsx' con la data odierna",
+        "Le colonne includono: Nome adulto, Cognome adulto, Email, Telefono, Data di nascita, Socio CAI, Sezione CAI, Attività, e per ogni minore (1-3): Nome, Cognome, Data di nascita",
+        "Il parametro opzionale ?activity_id=X filtra correttamente per attività",
+        "Se non ci sono registrazioni, il file contiene solo la riga di intestazione",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-034",
+      "title": "Stampa PDF /admin/registrations/print",
+      "description": "As an admin, I want to generate a print-ready PDF of registrations so I can have a paper list at each excursion.",
+      "acceptanceCriteria": [
+        "GET /admin/registrations/print risponde con download di file PDF (non 404 né 500)",
+        "Il package barryvdh/laravel-dompdf è installato via composer se non già presente",
+        "Il file scaricato si chiama 'iscrizioni-YYYY-MM-DD.pdf' con la data odierna",
+        "Il PDF contiene una tabella con colonne: Nome, Cognome, Email, Telefono, Attività, Socio CAI (Sì/No), Sezione, Minori (lista nomi)",
+        "Intestazione del PDF: 'Iscrizioni – Giornata Regionale della Montagna' e data di generazione",
+        "Il parametro opzionale ?activity_id=X filtra per attività",
+        "La view blade per il PDF è creata in resources/views/admin/print.blade.php",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-029",
+      "title": "Persistenza sezione CAI adulto su errore form",
+      "description": "As a user, I want the CAI section I selected to remain visible after a failed form submission so I don't have to search and select it again.",
+      "acceptanceCriteria": [
+        "Dopo un errore di validazione, il campo autocomplete sezione CAI adulto mostra il nome della sezione precedentemente selezionata",
+        "Il campo hidden cai_section_id ha il valore corretto (old('cai_section_id'))",
+        "Il controller (showForm o store con redirect back) passa alla view il nome della sezione pre-selezionata (da CaiSection::find(old('cai_section_id'))->name se esiste)",
+        "L'inizializzazione Alpine.js del componente sezione legge il valore pre-idratato dal controller",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-030",
+      "title": "Persistenza dati minori su errore form (inclusa sezione CAI)",
+      "description": "As a user, I want all the minor data I entered (including their CAI section) to remain after a failed form submission so I don't have to re-enter everything.",
+      "acceptanceCriteria": [
+        "Dopo un errore di validazione, tutti i minori precedentemente aggiunti vengono ripristinati nel form (nome, cognome, data di nascita, socio sì/no, codice fiscale)",
+        "L'array Alpine.js 'minors' viene inizializzato con JSON.parse del valore old('minors', []) passato dalla view",
+        "Per ogni minore che era socio CAI, la sezione selezionata torna visibile nell'autocomplete (nome + id pre-idratati)",
+        "Il controller (o redirect back) passa un array $preloadedMinorSections con le sezioni corrispondenti agli ID in old('minors')",
+        "I campi condizionali (sezione / codice fiscale) si mostrano/nascondono correttamente in base al flag is_cai_member ripristinato",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-035",
+      "title": "Recap completo nella pagina /conferma",
+      "description": "As a user, I want the confirmation page to show all the data I entered so I can verify everything was recorded correctly.",
+      "acceptanceCriteria": [
+        "La sezione adulto mostra: Nome, Cognome, Data di nascita (gg/mm/aaaa), Email, Telefono, Socio CAI (Sì / No), Sezione CAI (se socio) oppure Codice Fiscale (se non socio)",
+        "Per ogni minore: Nome, Cognome, Data di nascita (gg/mm/aaaa), Socio CAI (Sì / No), Sezione CAI (se socio) oppure Codice Fiscale (se non socio)",
+        "Il controller confirm() carica $registration con le relazioni: activity, caiSection, minors, minors.caiSection",
+        "Se cai_section_id è null, mostra 'Non socio CAI' (non un campo vuoto)",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-036",
+      "title": "Recap completo nell'email di conferma",
+      "description": "As a user, I want the confirmation email to show all the data I entered so I have a complete record of my registration.",
+      "acceptanceCriteria": [
+        "La sezione adulto nell'email mostra: Nome, Cognome, Data di nascita (gg/mm/aaaa), Email, Telefono, Socio CAI (Sì / No), Sezione CAI (se socio) oppure Codice Fiscale (se non socio)",
+        "Per ogni minore nell'email: Nome, Cognome, Data di nascita (gg/mm/aaaa), Socio CAI (Sì / No), Sezione CAI (se socio) oppure Codice Fiscale (se non socio)",
+        "Il Mailable RegistrationConfirmation passa $registration con relazioni caiSection e minors.caiSection caricate",
+        "Il layout email rimane consistente con lo stile esistente (inline CSS, box per sezione)",
+        "Typecheck passes"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}
