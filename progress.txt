@@ -45,3 +45,15 @@
   - Il banner è inserito tra la riga 7 (chiusura div header) e la riga 9 (apertura form) del template
   - Solo modifica Blade, nessun cambio PHP/controller necessario
 ---
+
+## 2026-06-27 - US-048
+- Creata migration `2026_06_27_000001_add_metadata_to_activities_table.php` con 6 colonne nullable dopo `longitude`
+- Aggiornato `Activity::$fillable` con i 6 nuovi campi
+- Aggiunto in `ActivityResource` form admin: TextInput per difficulty, elevation_gain, trail_length, water_description, image_url; Textarea per itinerary_description
+- Aggiornato `showActivities()` in `RegistrationController` con i 5 nuovi campi nel mapping (difficulty, elevation_gain, trail_length, water_description, itinerary_description)
+- Migration eseguita con `php artisan migrate` senza errori
+- **Learnings for future iterations:**
+  - I campi sono string nullable (non enum) per massima flessibilità con i dati CAI
+  - `image_url` non incluso nel mapping del controller perché non usato nella view pubblica (solo admin Filament)
+  - Il seeder US-049 dipende da questa migration — deve girare dopo
+---
